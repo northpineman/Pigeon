@@ -76,7 +76,7 @@ export default function NestMatchGame({ onFinish, onClose }) {
       </div>
       {done && (
         <div style={{ marginTop: 14 }}>
-          <div style={{ fontFamily: "'Baloo 2'", fontSize: 18, marginBottom: 8 }}>All paired! 🎉</div>
+          <div style={{ fontFamily: "'Fraunces', serif", fontSize: 18, marginBottom: 8 }}>All paired! 🎉</div>
           <button className="btn btn-primary" onClick={onClose}>Close</button>
         </div>
       )}

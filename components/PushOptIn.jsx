@@ -85,7 +85,7 @@ export default function PushOptIn({ userId }) {
 
   return (
     <div style={{ textAlign: "center" }}>
-      <div style={{ fontFamily: "'Baloo 2'", fontSize: 20, marginBottom: 8 }}>🔔 Notifications</div>
+      <div style={{ fontFamily: "'Fraunces', serif", fontSize: 20, marginBottom: 8 }}>🔔 Notifications</div>
 
       {status === "checking" && <div style={{ fontSize: 13, color: "#8a7a72" }}>Checking your browser…</div>}
 

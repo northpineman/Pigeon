@@ -43,7 +43,7 @@ export default function AdminPanel({ config, onClose, onSave, saving }) {
   return (
     <div className="admin-screen">
       <div className="admin-header">
-        <div style={{ fontFamily: "'Baloo 2'", fontSize: 18 }}>🔧 Admin Panel</div>
+        <div style={{ fontFamily: "'Fraunces', serif", fontSize: 18 }}>🔧 Admin Panel</div>
         <button className="btn btn-ghost" onClick={onClose}>Exit</button>
       </div>
       <div className="admin-body">

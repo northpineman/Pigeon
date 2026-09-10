@@ -26,7 +26,7 @@ export default function Leaderboard({ myUsername }) {
   return (
     <div>
       <div style={{ textAlign: "center", marginBottom: 12 }}>
-        <div style={{ fontFamily: "'Baloo 2'", fontSize: 20 }}>📊 Top Lofts</div>
+        <div style={{ fontFamily: "'Fraunces', serif", fontSize: 20 }}>📊 Top Lofts</div>
         <div style={{ fontSize: 12, color: "#8a7a72" }}>Ranked by seeds saved up</div>
       </div>
       {error && <div style={{ fontSize: 12, color: "#B23A3A", textAlign: "center" }}>Couldn't load leaderboard: {error}</div>}

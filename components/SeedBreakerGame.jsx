@@ -159,7 +159,7 @@ export default function SeedBreakerGame({ onFinish, onClose }) {
       {status === "playing" && <div style={{ fontSize: 11, color: "#8a7a72", marginTop: 6 }}>Tap or click to launch the ball · drag to move the paddle</div>}
       {status !== "playing" && (
         <div style={{ marginTop: 12 }}>
-          <div style={{ fontFamily: "'Baloo 2'", fontSize: 18, marginBottom: 8 }}>{status === "won" ? "Loft cleared! 🎉" : "Out of tries!"}</div>
+          <div style={{ fontFamily: "'Fraunces', serif", fontSize: 18, marginBottom: 8 }}>{status === "won" ? "Loft cleared! 🎉" : "Out of tries!"}</div>
           <button className="btn btn-primary" onClick={onClose}>Close</button>
         </div>
       )}

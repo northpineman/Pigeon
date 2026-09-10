@@ -5,32 +5,18 @@ import BirdSVG from "./BirdSVG";
 import { StatBar, Modal } from "./ui";
 import SeedBreakerGame from "./SeedBreakerGame";
 import NestMatchGame from "./NestMatchGame";
+import SkyDashGame from "./SkyDashGame";
+import WindRiderGame from "./WindRiderGame";
+import StormChaseGame from "./StormChaseGame";
+import BloomBreakerGame from "./BloomBreakerGame";
+import BirdTriviaGame from "./BirdTriviaGame";
+import NestCatchGame from "./NestCatchGame";
 import AdminPanel from "./AdminPanel";
 import Achievements from "./Achievements";
 import Leaderboard from "./Leaderboard";
 import PushOptIn from "./PushOptIn";
-import {
-  SPECIES,
-  TABS,
-  DEFAULT_CONFIG,
-  HOUR,
-  LOFT_BASE_CAPACITY,
-  CAPACITY_PER_UPGRADE,
-  pickRandom,
-  todayStr,
-  yesterdayStr,
-  pickRandomName,
-  computeHunger,
-  computeClean,
-  computeHappiness,
-  pendingIncome,
-  adoptCost,
-  upgradeCost,
-  formatDuration,
-  makeBird,
-  defaultBirds,
-  computeUnlockedKeys,
-} from "@/lib/gameData";
+import { SPECIES, TABS, DEFAULT_CONFIG, HOUR, LOFT_BASE_CAPACITY, CAPACITY_PER_UPGRADE, pickRandom, todayStr, yesterdayStr, pickRandomName, computeHunger, computeClean, computeHappiness, pendingIncome, adoptCost, upgradeCost, formatDuration, makeBird, defaultBirds, computeUnlockedKeys } from "@/lib/gameData";
+import { theme } from "@/lib/theme";
 
 export default function GameApp({ user, profile, onSignOut }) {
   const [loaded, setLoaded] = useState(false);
@@ -411,29 +397,24 @@ export default function GameApp({ user, profile, onSignOut }) {
 
   if (!loaded) {
     return (
-      <div className="page">
-        <div className="phone">
-          <div className="loading-screen">
-            <div className="em">🕊️</div>
-            <div style={{ fontFamily: "'Baloo 2'", fontWeight: 700 }}>Waking the pigeons…</div>
-          </div>
+      <div className="site">
+        <div className="loading-screen">
+          <div className="em">🕊️</div>
+          <div className="display" style={{ fontWeight: 700 }}>Waking the pigeons…</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="page">
-      <div className="phone">
-        <div className="hero">
-          <div className="titlebar">
-            <h1>🕊️ PigeonsnDoves</h1>
-            <button className="btn btn-ghost" style={{ padding: "6px 10px", fontSize: 11 }} onClick={onSignOut}>
-              Sign out
-            </button>
-          </div>
-          <div style={{ fontSize: 11.5, color: "#6b5a5c", fontWeight: 700, marginTop: -4, marginBottom: 6 }}>@{profile.username}</div>
-          <div className="pills" style={{ flexWrap: "wrap" }}>
+    <div className="site">
+      <header className="site-header">
+        <div className="brand">
+          <h1>🕊️ PigeonsnDoves</h1>
+          <span className="handle">@{profile.username}</span>
+        </div>
+        <div className="header-actions">
+          <div className="pills">
             <div className="pill">🌾 {seeds}</div>
             <div className="pill">🔥 {streak}</div>
             <button className="pill" onClick={() => setShowAchievements(true)} title="Achievements">🏆</button>
@@ -443,7 +424,28 @@ export default function GameApp({ user, profile, onSignOut }) {
               <button className="pill" onClick={() => setAdminOpen(true)} title="Admin">🔧</button>
             )}
           </div>
-          <div className="roofline" />
+          <button className="btn btn-ghost" style={{ padding: "7px 12px", fontSize: 12 }} onClick={onSignOut}>
+            Sign out
+          </button>
+        </div>
+      </header>
+
+      <div className="hero-band" style={{ background: `linear-gradient(120deg, ${theme.heroGradient.join(", ")})` }}>
+        <div className="hero-motifs">
+          {theme.motifs.map((m, i) => (
+            <span
+              key={i}
+              style={{
+                left: `${8 + i * 20}%`,
+                top: `${10 + (i % 3) * 22}%`,
+                animationDelay: `${i * 1.3}s`,
+              }}
+            >
+              {m}
+            </span>
+          ))}
+        </div>
+        <div className="hero-inner">
           <div className="income-strip">
             <div>
               <div className="label">Loft income</div>
@@ -454,8 +456,23 @@ export default function GameApp({ user, profile, onSignOut }) {
             </button>
           </div>
         </div>
+      </div>
 
-        <div className="content">
+      <nav className="site-nav">
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            className="tabbtn"
+            style={{ color: tab === t.key ? t.color : undefined, background: tab === t.key ? t.color + "1a" : "transparent" }}
+            onClick={() => setTab(t.key)}
+          >
+            <span className="icon">{t.icon}</span>
+            {t.label}
+          </button>
+        ))}
+      </nav>
+
+      <main className="content">
           {tab === "loft" && (
             <>
               <div className="section-title">
@@ -477,7 +494,7 @@ export default function GameApp({ user, profile, onSignOut }) {
                   );
                 })}
                 {Array.from({ length: Math.max(0, loftCapacity - birds.length) }).map((_, i) => (
-                  <div className="empty-slot" key={i}>empty nest box</div>
+                  <div className="empty-slot" key={i}>An empty perch — adopt or breed a bird to fill it</div>
                 ))}
               </div>
             </>
@@ -493,6 +510,7 @@ export default function GameApp({ user, profile, onSignOut }) {
               {nestsSubtab === "adopt" ? (
                 <>
                   <div className="section-title">Adopt a bird</div>
+                  <div className="item-grid">
                   {Object.entries(SPECIES).map(([key, sp]) => (
                     <div className="market-item" key={key}>
                       <BirdSVG speciesKey={key} colorKey={sp.colors[0]} stage="adult" size={46} />
@@ -505,6 +523,7 @@ export default function GameApp({ user, profile, onSignOut }) {
                       </button>
                     </div>
                   ))}
+                  </div>
                 </>
               ) : (
                 <>
@@ -543,6 +562,7 @@ export default function GameApp({ user, profile, onSignOut }) {
               </div>
 
               <div className="section-title">Decorations</div>
+              <div className="item-grid">
               {(eventsSubtab === "christmas" ? config.christmasItems : config.halloweenItems).map((d) => {
                 const owned = decorations.includes(d.key);
                 return (
@@ -558,8 +578,10 @@ export default function GameApp({ user, profile, onSignOut }) {
                   </div>
                 );
               })}
+              </div>
 
               <div className="section-title" style={{ marginTop: 16 }}>Exclusive birds</div>
+              <div className="item-grid">
               {config.seasonalBirds.filter((b) => b.season === eventsSubtab).map((sb) => (
                 <div className="market-item" key={sb.key}>
                   <BirdSVG speciesKey={sb.speciesKey} colorKey={sb.colorKey} stage="adult" size={46} />
@@ -572,12 +594,14 @@ export default function GameApp({ user, profile, onSignOut }) {
                   </button>
                 </div>
               ))}
+              </div>
             </>
           )}
 
           {tab === "games" && (
             <>
               <div className="section-title">Minigames</div>
+              <div className="item-grid">
               <div className="market-item">
                 <div style={{ fontSize: 28 }}>🧱</div>
                 <div className="info">
@@ -593,6 +617,55 @@ export default function GameApp({ user, profile, onSignOut }) {
                   <div className="sub">Memory matching game</div>
                 </div>
                 <button className="btn btn-primary" onClick={() => setActiveGame("match")}>Play</button>
+              </div>
+              <div className="market-item">
+                <div style={{ fontSize: 28 }}>🐦</div>
+                <div className="info">
+                  <div className="nm">Sky Dash</div>
+                  <div className="sub">Flap between the vines, endless</div>
+                </div>
+                <button className="btn btn-primary" onClick={() => setActiveGame("skydash")}>Play</button>
+              </div>
+              <div className="market-item">
+                <div style={{ fontSize: 28 }}>🌬️</div>
+                <div className="info">
+                  <div className="nm">Wind Rider</div>
+                  <div className="sub">Switch lanes, grab seeds, dodge storms</div>
+                </div>
+                <button className="btn btn-primary" onClick={() => setActiveGame("windrider")}>Play</button>
+              </div>
+              <div className="market-item">
+                <div style={{ fontSize: 28 }}>⛈️</div>
+                <div className="info">
+                  <div className="nm">Storm Chase</div>
+                  <div className="sub">Outfly the storm, manage your boost</div>
+                </div>
+                <button className="btn btn-primary" onClick={() => setActiveGame("stormchase")}>Play</button>
+              </div>
+              <div className="market-item">
+                <div style={{ fontSize: 28 }}>🌸</div>
+                <div className="info">
+                  <div className="nm">Bloom Breaker</div>
+                  <div className="sub">Click matching groups to clear the board</div>
+                </div>
+                <button className="btn btn-primary" onClick={() => setActiveGame("bloombreaker")}>Play</button>
+              </div>
+              <div className="market-item">
+                <div style={{ fontSize: 28 }}>🧠</div>
+                <div className="info">
+                  <div className="nm">Bird Trivia</div>
+                  <div className="sub">8 questions about pigeons &amp; doves</div>
+                </div>
+                <button className="btn btn-primary" onClick={() => setActiveGame("trivia")}>Play</button>
+              </div>
+              <div className="market-item">
+                <div style={{ fontSize: 28 }}>🪹</div>
+                <div className="info">
+                  <div className="nm">Nest Catch</div>
+                  <div className="sub">Catch falling seeds before time runs out</div>
+                </div>
+                <button className="btn btn-primary" onClick={() => setActiveGame("nestcatch")}>Play</button>
+              </div>
               </div>
             </>
           )}
@@ -612,6 +685,7 @@ export default function GameApp({ user, profile, onSignOut }) {
               </div>
 
               <div className="section-title" style={{ marginTop: 16 }}>Decorate (+happiness for everyone)</div>
+              <div className="item-grid">
               {config.decorations.map((d) => {
                 const owned = decorations.includes(d.key);
                 return (
@@ -627,8 +701,10 @@ export default function GameApp({ user, profile, onSignOut }) {
                   </div>
                 );
               })}
+              </div>
 
               <div className="section-title" style={{ marginTop: 16 }}>Get more seeds</div>
+              <div className="item-grid">
               {(config.seedPacks || []).map((p) => (
                 <div className="market-item" key={p.key}>
                   <div style={{ fontSize: 28 }}>{p.emoji}</div>
@@ -641,22 +717,14 @@ export default function GameApp({ user, profile, onSignOut }) {
                   </button>
                 </div>
               ))}
+              </div>
 
               <button className="btn btn-ghost" style={{ width: "100%", marginTop: 18 }} onClick={resetGame}>
                 Reset progress
               </button>
             </>
           )}
-        </div>
-
-        <div className="tabbar">
-          {TABS.map((t) => (
-            <button key={t.key} className="tabbtn" style={{ color: tab === t.key ? t.color : "#a89c8e" }} onClick={() => setTab(t.key)}>
-              <span className="icon" style={{ background: tab === t.key ? t.color : "#F0E7DA", color: tab === t.key ? "#fff" : "#a89c8e" }}>{t.icon}</span>
-              {t.label}
-            </button>
-          ))}
-        </div>
+        </main>
 
         {toast && <div className="toast">{toast}</div>}
 
@@ -664,7 +732,7 @@ export default function GameApp({ user, profile, onSignOut }) {
           <Modal onClose={() => { setSelectedBirdId(null); setRenameDraft(""); }}>
             <div style={{ textAlign: "center" }}>
               <BirdSVG speciesKey={selectedBird.speciesKey} colorKey={selectedBird.colorKey} stage={selectedBird.stage} size={100} />
-              <div style={{ fontFamily: "'Baloo 2'", fontSize: 19, marginTop: 4 }}>
+              <div style={{ fontFamily: "'Fraunces', serif", fontSize: 19, marginTop: 4 }}>
                 {selectedBird.name} <span className={`gender ${selectedBird.gender}`}>{selectedBird.gender === "m" ? "♂" : "♀"}</span>
               </div>
               <div style={{ fontSize: 12.5, color: "#8a7a72", marginBottom: 8 }}>{SPECIES[selectedBird.speciesKey].name}</div>
@@ -714,9 +782,9 @@ export default function GameApp({ user, profile, onSignOut }) {
           <div className="modal-backdrop">
             <div className="modal-sheet centered" style={{ textAlign: "center" }}>
               <div style={{ fontSize: 40 }}>🔥</div>
-              <div style={{ fontFamily: "'Baloo 2'", fontSize: 19, margin: "6px 0" }}>Day {dailyReward.streak} streak!</div>
+              <div style={{ fontFamily: "'Fraunces', serif", fontSize: 19, margin: "6px 0" }}>Day {dailyReward.streak} streak!</div>
               <div style={{ fontSize: 14, marginBottom: 14, color: "#6b5a5c" }}>Welcome back to the loft. Here's a little something for stopping by.</div>
-              <div style={{ fontFamily: "'Baloo 2'", fontSize: 24, color: "var(--gold)", marginBottom: 14 }}>+{dailyReward.amount} 🌾</div>
+              <div style={{ fontFamily: "'Fraunces', serif", fontSize: 24, color: "var(--gold)", marginBottom: 14 }}>+{dailyReward.amount} 🌾</div>
               <button className="btn btn-primary" style={{ width: "100%", padding: 12 }} onClick={claimDaily}>Claim</button>
             </div>
           </div>
@@ -730,6 +798,36 @@ export default function GameApp({ user, profile, onSignOut }) {
         {activeGame === "match" && (
           <Modal onClose={() => setActiveGame(null)}>
             <NestMatchGame onFinish={(amount, won) => handleGameFinish(amount, won, "match")} onClose={() => setActiveGame(null)} />
+          </Modal>
+        )}
+        {activeGame === "skydash" && (
+          <Modal onClose={() => setActiveGame(null)}>
+            <SkyDashGame onFinish={(amount, won) => handleGameFinish(amount, won, "skydash")} onClose={() => setActiveGame(null)} />
+          </Modal>
+        )}
+        {activeGame === "windrider" && (
+          <Modal onClose={() => setActiveGame(null)}>
+            <WindRiderGame onFinish={(amount, won) => handleGameFinish(amount, won, "windrider")} onClose={() => setActiveGame(null)} />
+          </Modal>
+        )}
+        {activeGame === "stormchase" && (
+          <Modal onClose={() => setActiveGame(null)}>
+            <StormChaseGame onFinish={(amount, won) => handleGameFinish(amount, won, "stormchase")} onClose={() => setActiveGame(null)} />
+          </Modal>
+        )}
+        {activeGame === "bloombreaker" && (
+          <Modal onClose={() => setActiveGame(null)}>
+            <BloomBreakerGame onFinish={(amount, won) => handleGameFinish(amount, won, "bloombreaker")} onClose={() => setActiveGame(null)} />
+          </Modal>
+        )}
+        {activeGame === "trivia" && (
+          <Modal onClose={() => setActiveGame(null)}>
+            <BirdTriviaGame onFinish={(amount, won) => handleGameFinish(amount, won, "trivia")} onClose={() => setActiveGame(null)} />
+          </Modal>
+        )}
+        {activeGame === "nestcatch" && (
+          <Modal onClose={() => setActiveGame(null)}>
+            <NestCatchGame onFinish={(amount, won) => handleGameFinish(amount, won, "nestcatch")} onClose={() => setActiveGame(null)} />
           </Modal>
         )}
 
@@ -752,7 +850,6 @@ export default function GameApp({ user, profile, onSignOut }) {
         {adminOpen && (
           <AdminPanel config={config} saving={adminSaving} onClose={() => setAdminOpen(false)} onSave={handleAdminSave} />
         )}
-      </div>
     </div>
   );
 }

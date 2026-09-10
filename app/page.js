@@ -67,12 +67,10 @@ export default function HomePage() {
 
   if (checking || !user) {
     return (
-      <div className="page">
-        <div className="phone">
-          <div className="loading-screen">
-            <div className="em">🕊️</div>
-            <div style={{ fontFamily: "'Baloo 2'", fontWeight: 700 }}>Loading…</div>
-          </div>
+      <div className="site">
+        <div className="loading-screen">
+          <div className="em">🕊️</div>
+          <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 700 }}>Loading…</div>
         </div>
       </div>
     );
