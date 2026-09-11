@@ -17,6 +17,7 @@ import Leaderboard from "./Leaderboard";
 import PushOptIn from "./PushOptIn";
 import { SPECIES, TABS, DEFAULT_CONFIG, HOUR, LOFT_BASE_CAPACITY, CAPACITY_PER_UPGRADE, pickRandom, todayStr, yesterdayStr, pickRandomName, computeHunger, computeClean, computeHappiness, pendingIncome, adoptCost, upgradeCost, formatDuration, makeBird, defaultBirds, computeUnlockedKeys } from "@/lib/gameData";
 import { theme } from "@/lib/theme";
+import HeroScene from "./HeroScene";
 
 export default function GameApp({ user, profile, onSignOut }) {
   const [loaded, setLoaded] = useState(false);
@@ -134,7 +135,7 @@ export default function GameApp({ user, profile, onSignOut }) {
     setStreak(dailyReward.streak);
     setLastLoginDate(todayStr());
     setDailyReward(null);
-    notify(`+${dailyReward.amount} seeds claimed`);
+    notify(`+${dailyReward.amount} seeds for stopping by 🌾`);
   };
 
   /* ---- ticking clock + growth transitions ---- */
@@ -203,7 +204,7 @@ export default function GameApp({ user, profile, onSignOut }) {
         setUnlockedKeys((prev) => [...prev, ...newKeys]);
         newKeys.forEach((k) => {
           const a = achievementCatalog.find((x) => x.key === k);
-          if (a) notify(`🏆 ${a.name} unlocked!`);
+          if (a) notify(`🏆 Earned: ${a.name}`);
         });
       }
     })();
@@ -217,7 +218,7 @@ export default function GameApp({ user, profile, onSignOut }) {
     if (!purchase) return;
     window.history.replaceState({}, "", window.location.pathname);
     if (purchase === "success") {
-      notify("Payment received! Adding your seeds…");
+      notify("Payment received — seeds incoming 🌾");
       let attempts = 0;
       const poll = setInterval(async () => {
         attempts += 1;
@@ -226,7 +227,7 @@ export default function GameApp({ user, profile, onSignOut }) {
         if (attempts >= 5) clearInterval(poll);
       }, 1500);
     } else if (purchase === "cancelled") {
-      notify("Checkout cancelled");
+      notify("No charge — checkout cancelled");
     }
   }, []); // eslint-disable-line
 
@@ -238,11 +239,11 @@ export default function GameApp({ user, profile, onSignOut }) {
     if (pending <= 0) return;
     setSeeds((s) => s + pending);
     setLastCollectAt(now);
-    notify(`+${pending} seeds collected`);
+    notify(`+${pending} seeds gathered from the loft`);
   };
 
   const handleFeed = (id) => {
-    if (seeds < config.feedCost) return notify("Not enough seeds to buy feed");
+    if (seeds < config.feedCost) return notify("You're a bit short on seeds for feed");
     setBirds((prev) => prev.map((b) => (b.id === id ? { ...b, lastFedAt: Date.now() } : b)));
     setSeeds((s) => s - config.feedCost);
   };
@@ -253,27 +254,27 @@ export default function GameApp({ user, profile, onSignOut }) {
 
   const handleAdopt = (speciesKey) => {
     const cost = adoptCost(config, speciesKey, birds.length);
-    if (birds.length >= loftCapacity) return notify("Your loft is full");
-    if (seeds < cost) return notify("Not enough seeds");
+    if (birds.length >= loftCapacity) return notify("Your loft is full — upgrade for more room");
+    if (seeds < cost) return notify("You're a bit short on seeds");
     const colorKey = pickRandom(SPECIES[speciesKey].colors);
     const t = Date.now();
     const bird = makeBird({ speciesKey, colorKey, stage: "baby", now: t, growAt: t + config.adoptGrowHours * HOUR });
     bird.name = pickRandomName(usedNames);
     setBirds((prev) => [...prev, bird]);
     setSeeds((s) => s - cost);
-    notify(`${bird.name} joined the loft!`);
+    notify(`${bird.name} has joined the loft! 🕊️`);
   };
 
   const handleAdoptSeasonal = (sb) => {
-    if (birds.length >= loftCapacity) return notify("Your loft is full");
-    if (seeds < sb.cost) return notify("Not enough seeds");
+    if (birds.length >= loftCapacity) return notify("Your loft is full — upgrade for more room");
+    if (seeds < sb.cost) return notify("You're a bit short on seeds");
     const t = Date.now();
     const bird = makeBird({ speciesKey: sb.speciesKey, colorKey: sb.colorKey, stage: "baby", now: t, growAt: t + config.adoptGrowHours * HOUR });
     bird.name = pickRandomName(usedNames);
     setBirds((prev) => [...prev, bird]);
     setSeeds((s) => s - sb.cost);
     setFlags((prev) => ({ ...prev, seasonalAdopted: true }));
-    notify(`${bird.name} joined the loft!`);
+    notify(`${bird.name} has joined the loft! 🕊️`);
   };
 
   const toggleBreedSelect = (id) => {
@@ -293,8 +294,8 @@ export default function GameApp({ user, profile, onSignOut }) {
 
   const handleBreed = () => {
     if (!canBreed) return;
-    if (birds.length >= loftCapacity) return notify("Your loft is full");
-    if (seeds < config.breedCost) return notify("Not enough seeds");
+    if (birds.length >= loftCapacity) return notify("Your loft is full — upgrade for more room");
+    if (seeds < config.breedCost) return notify("You're a bit short on seeds");
     const t = Date.now();
     const [idA, idB] = breedSelection;
     const parentA = birds.find((b) => b.id === idA);
@@ -308,24 +309,24 @@ export default function GameApp({ user, profile, onSignOut }) {
     setSeeds((s) => s - config.breedCost);
     setBreedSelection([]);
     setFlags((prev) => ({ ...prev, bred: true }));
-    notify("A new egg is nesting!");
+    notify("An egg is nesting in the loft 🥚");
   };
 
   const handleUpgradeLoft = () => {
     const cost = upgradeCost(config, upgradesBought);
-    if (seeds < cost) return notify("Not enough seeds");
+    if (seeds < cost) return notify("You're a bit short on seeds");
     setSeeds((s) => s - cost);
     setLoftCapacity((c) => c + CAPACITY_PER_UPGRADE);
     setUpgradesBought((n) => n + 1);
-    notify("Loft expanded!");
+    notify("Loft expanded — more room to nest");
   };
 
   const handleBuyDecor = (key, cost) => {
     if (decorations.includes(key)) return;
-    if (seeds < cost) return notify("Not enough seeds");
+    if (seeds < cost) return notify("You're a bit short on seeds");
     setSeeds((s) => s - cost);
     setDecorations((prev) => [...prev, key]);
-    notify("Added to the loft");
+    notify("Placed in your loft");
   };
 
   const handleRename = (id) => {
@@ -338,7 +339,7 @@ export default function GameApp({ user, profile, onSignOut }) {
   const handleGameFinish = (amount, won, gameKey) => {
     if (amount > 0) {
       setSeeds((s) => s + amount);
-      notify(`+${amount} seeds earned!`);
+      notify(`+${amount} seeds — nice playing!`);
     }
     if (won && gameKey) {
       setFlags((prev) => ({ ...prev, [`${gameKey}Won`]: true }));
@@ -349,7 +350,7 @@ export default function GameApp({ user, profile, onSignOut }) {
     const {
       data: { session },
     } = await supabase.auth.getSession();
-    if (!session) return notify("Please log in again");
+    if (!session) return notify("Please sign back in to continue");
     try {
       const res = await fetch("/api/stripe/create-checkout-session", {
         method: "POST",
@@ -360,10 +361,10 @@ export default function GameApp({ user, profile, onSignOut }) {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        notify(data.error || "Could not start checkout");
+        notify(data.error || "Checkout couldn't start — try again");
       }
     } catch (e) {
-      notify("Could not start checkout");
+      notify("Checkout couldn't start — try again");
     }
   };
 
@@ -372,12 +373,12 @@ export default function GameApp({ user, profile, onSignOut }) {
     const { error } = await supabase.from("game_config").update({ config: newConfig, updated_at: new Date().toISOString() }).eq("id", 1);
     setAdminSaving(false);
     if (error) {
-      notify("Could not save settings: " + error.message);
+      notify("Couldn't save settings: " + error.message);
       return;
     }
     setConfig(newConfig);
     setAdminOpen(false);
-    notify("Settings saved for everyone");
+    notify("Settings saved — live for everyone now");
   };
 
   const resetGame = () => {
@@ -390,7 +391,7 @@ export default function GameApp({ user, profile, onSignOut }) {
     setLastCollectAt(t);
     setSelectedBirdId(null);
     setBreedSelection([]);
-    notify("Fresh start!");
+    notify("Fresh start — welcome back to day one");
   };
 
   const selectedBird = birds.find((b) => b.id === selectedBirdId) || null;
@@ -430,7 +431,8 @@ export default function GameApp({ user, profile, onSignOut }) {
         </div>
       </header>
 
-      <div className="hero-band" style={{ background: `linear-gradient(120deg, ${theme.heroGradient.join(", ")})` }}>
+      <div className="hero-band">
+        <HeroScene />
         <div className="hero-motifs">
           {theme.motifs.map((m, i) => (
             <span
@@ -527,8 +529,8 @@ export default function GameApp({ user, profile, onSignOut }) {
                 </>
               ) : (
                 <>
-                  <div className="section-title">Pair up two birds</div>
-                  <div style={{ fontSize: 12, color: "#8a7a72", marginBottom: 10 }}>
+                  <div className="section-title">Pair Up Two Birds to Nest</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-soft)", marginBottom: 10 }}>
                     Pick one male ♂ and one female ♀ adult bird. Nesting costs {config.breedCost} seeds and takes {formatDuration(config.eggHatchHours * HOUR)}.
                   </div>
                   {birds.filter((b) => b.stage === "adult").map((b) => {
@@ -541,7 +543,7 @@ export default function GameApp({ user, profile, onSignOut }) {
                           <div style={{ fontWeight: 800, fontSize: 13 }}>
                             {b.name} <span className={`gender ${b.gender}`}>{b.gender === "m" ? "♂" : "♀"}</span>
                           </div>
-                          <div style={{ fontSize: 11, color: "#8a7a72" }}>{busy ? `nesting ${formatDuration(b.breedingUntil - now)}` : SPECIES[b.speciesKey].name}</div>
+                          <div style={{ fontSize: 11, color: "var(--ink-soft)" }}>{busy ? `nesting ${formatDuration(b.breedingUntil - now)}` : SPECIES[b.speciesKey].name}</div>
                         </div>
                       </div>
                     );
@@ -600,7 +602,7 @@ export default function GameApp({ user, profile, onSignOut }) {
 
           {tab === "games" && (
             <>
-              <div className="section-title">Minigames</div>
+              <div className="section-title">Games at the Roost</div>
               <div className="item-grid">
               <div className="market-item">
                 <div style={{ fontSize: 28 }}>🧱</div>
@@ -735,7 +737,7 @@ export default function GameApp({ user, profile, onSignOut }) {
               <div style={{ fontFamily: "'Fraunces', serif", fontSize: 19, marginTop: 4 }}>
                 {selectedBird.name} <span className={`gender ${selectedBird.gender}`}>{selectedBird.gender === "m" ? "♂" : "♀"}</span>
               </div>
-              <div style={{ fontSize: 12.5, color: "#8a7a72", marginBottom: 8 }}>{SPECIES[selectedBird.speciesKey].name}</div>
+              <div style={{ fontSize: 12.5, color: "var(--ink-soft)", marginBottom: 8 }}>{SPECIES[selectedBird.speciesKey].name}</div>
             </div>
 
             {selectedBird.stage === "egg" ? (
@@ -755,7 +757,7 @@ export default function GameApp({ user, profile, onSignOut }) {
                   <StatBar value={computeHappiness(selectedBird, now, config, decorBonus)} color="var(--sage)" />
                 </div>
                 {selectedBird.stage === "baby" && (
-                  <div style={{ fontSize: 12, color: "#8a7a72", margin: "8px 0" }}>Grows up in {formatDuration(selectedBird.growAt - now)}</div>
+                  <div style={{ fontSize: 12, color: "var(--ink-soft)", margin: "8px 0" }}>Grows up in {formatDuration(selectedBird.growAt - now)}</div>
                 )}
                 <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
                   <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => handleFeed(selectedBird.id)} disabled={seeds < config.feedCost}>
@@ -783,7 +785,7 @@ export default function GameApp({ user, profile, onSignOut }) {
             <div className="modal-sheet centered" style={{ textAlign: "center" }}>
               <div style={{ fontSize: 40 }}>🔥</div>
               <div style={{ fontFamily: "'Fraunces', serif", fontSize: 19, margin: "6px 0" }}>Day {dailyReward.streak} streak!</div>
-              <div style={{ fontSize: 14, marginBottom: 14, color: "#6b5a5c" }}>Welcome back to the loft. Here's a little something for stopping by.</div>
+              <div style={{ fontSize: 14, marginBottom: 14, color: "var(--ink-soft)" }}>Welcome back to the loft. Here's a little something for stopping by.</div>
               <div style={{ fontFamily: "'Fraunces', serif", fontSize: 24, color: "var(--gold)", marginBottom: 14 }}>+{dailyReward.amount} 🌾</div>
               <button className="btn btn-primary" style={{ width: "100%", padding: 12 }} onClick={claimDaily}>Claim</button>
             </div>

@@ -157,7 +157,7 @@ export default function StormChaseGame({ onFinish, onClose }) {
         style={{ width: "100%", maxWidth: 300, borderRadius: 16, touchAction: "none" }}
       />
       {status === "playing" && (
-        <div style={{ fontSize: 11, color: "#8a7a72", marginTop: 6 }}>
+        <div style={{ fontSize: 11, color: "var(--ink-soft)", marginTop: 6 }}>
           Drag to steer · hold to boost ahead of the storm (drains stamina)
         </div>
       )}

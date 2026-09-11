@@ -151,7 +151,7 @@ export default function BloomBreakerGame({ onFinish, onClose }) {
         )}
       </div>
       {status === "playing" && (
-        <div style={{ fontSize: 11, color: "#8a7a72", marginTop: 8 }}>
+        <div style={{ fontSize: 11, color: "var(--ink-soft)", marginTop: 8 }}>
           Tap a group of 2+ matching blooms to clear them · bigger groups score more
         </div>
       )}

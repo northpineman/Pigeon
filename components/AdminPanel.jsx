@@ -122,7 +122,7 @@ export default function AdminPanel({ config, onClose, onSave, saving }) {
 
         <div style={{ marginBottom: 18 }}>
           <div className="section-title">💳 Real-money seed packs</div>
-          <div style={{ fontSize: 11, color: "#8a7a72", marginBottom: 8 }}>
+          <div style={{ fontSize: 11, color: "var(--ink-soft)", marginBottom: 8 }}>
             Prices are in US dollars. These are charged for real through Stripe — double-check before saving.
           </div>
           {draft.seedPacks.map((p, idx) => (

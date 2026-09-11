@@ -87,24 +87,24 @@ export default function PushOptIn({ userId }) {
     <div style={{ textAlign: "center" }}>
       <div style={{ fontFamily: "'Fraunces', serif", fontSize: 20, marginBottom: 8 }}>🔔 Notifications</div>
 
-      {status === "checking" && <div style={{ fontSize: 13, color: "#8a7a72" }}>Checking your browser…</div>}
+      {status === "checking" && <div style={{ fontSize: 13, color: "var(--ink-soft)" }}>Checking your browser…</div>}
 
       {status === "unsupported" && (
-        <div style={{ fontSize: 13, color: "#8a7a72" }}>
+        <div style={{ fontSize: 13, color: "var(--ink-soft)" }}>
           Push notifications aren't available in this browser. Try adding this site to your home screen first, or use
           a different browser.
         </div>
       )}
 
       {status === "denied" && (
-        <div style={{ fontSize: 13, color: "#8a7a72" }}>
+        <div style={{ fontSize: 13, color: "var(--ink-soft)" }}>
           Notifications are blocked for this site. You can re-enable them from your browser's site settings.
         </div>
       )}
 
       {status === "unsubscribed" && (
         <>
-          <div style={{ fontSize: 13, color: "#8a7a72", marginBottom: 12 }}>
+          <div style={{ fontSize: 13, color: "var(--ink-soft)", marginBottom: 12 }}>
             Get a gentle daily reminder when your birds and seeds are waiting for you.
           </div>
           <button className="btn btn-primary" onClick={enable} disabled={busy}>

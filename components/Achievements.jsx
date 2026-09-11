@@ -6,7 +6,7 @@ export default function Achievements({ catalog, unlockedKeys }) {
     <div>
       <div style={{ textAlign: "center", marginBottom: 12 }}>
         <div style={{ fontFamily: "'Fraunces', serif", fontSize: 20 }}>🏆 Achievements</div>
-        <div style={{ fontSize: 12, color: "#8a7a72" }}>
+        <div style={{ fontSize: 12, color: "var(--ink-soft)" }}>
           {unlockedKeys.length} / {catalog.length} unlocked
         </div>
       </div>
@@ -27,7 +27,7 @@ export default function Achievements({ catalog, unlockedKeys }) {
             >
               <div style={{ fontSize: 26 }}>{a.emoji}</div>
               <div style={{ fontWeight: 800, fontSize: 12, marginTop: 4 }}>{a.name}</div>
-              <div style={{ fontSize: 10, color: "#8a7a72", marginTop: 2 }}>{a.description}</div>
+              <div style={{ fontSize: 10, color: "var(--ink-soft)", marginTop: 2 }}>{a.description}</div>
             </div>
           );
         })}

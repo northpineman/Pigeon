@@ -59,7 +59,7 @@ export default function BirdTriviaGame({ onFinish, onClose }) {
     <div style={{ textAlign: "center" }}>
       {status === "playing" && current && (
         <>
-          <div style={{ fontWeight: 800, fontSize: 12.5, marginBottom: 10, color: "#8a7a72" }}>
+          <div style={{ fontWeight: 800, fontSize: 12.5, marginBottom: 10, color: "var(--ink-soft)" }}>
             Question {idx + 1} of {questions.length} · Correct: {correctCount}
           </div>
           <div style={{ fontFamily: "'Fraunces', serif", fontSize: 16, marginBottom: 14, minHeight: 44 }}>{current.q}</div>

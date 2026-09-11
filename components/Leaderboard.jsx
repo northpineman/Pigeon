@@ -27,11 +27,11 @@ export default function Leaderboard({ myUsername }) {
     <div>
       <div style={{ textAlign: "center", marginBottom: 12 }}>
         <div style={{ fontFamily: "'Fraunces', serif", fontSize: 20 }}>📊 Top Lofts</div>
-        <div style={{ fontSize: 12, color: "#8a7a72" }}>Ranked by seeds saved up</div>
+        <div style={{ fontSize: 12, color: "var(--ink-soft)" }}>Ranked by seeds saved up</div>
       </div>
       {error && <div style={{ fontSize: 12, color: "#B23A3A", textAlign: "center" }}>Couldn't load leaderboard: {error}</div>}
       {!error && !rows && <div style={{ textAlign: "center", fontSize: 13 }}>Loading…</div>}
-      {rows && rows.length === 0 && <div style={{ textAlign: "center", fontSize: 13, color: "#8a7a72" }}>No lofts yet — be the first!</div>}
+      {rows && rows.length === 0 && <div style={{ textAlign: "center", fontSize: 13, color: "var(--ink-soft)" }}>No lofts yet — be the first!</div>}
       {rows &&
         rows.map((r, i) => (
           <div
@@ -49,7 +49,7 @@ export default function Leaderboard({ myUsername }) {
           >
             <div style={{ width: 24, textAlign: "center", fontSize: 13 }}>{i + 1}</div>
             <div style={{ flex: 1, fontSize: 13 }}>{r.username}</div>
-            <div style={{ fontSize: 12, color: "#8a7a72" }}>{r.bird_count} birds</div>
+            <div style={{ fontSize: 12, color: "var(--ink-soft)" }}>{r.bird_count} birds</div>
             <div style={{ fontSize: 13, color: "var(--gold)", fontWeight: 800 }}>🌾 {r.seeds}</div>
           </div>
         ))}

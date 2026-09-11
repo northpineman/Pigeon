@@ -119,7 +119,7 @@ export default function NestCatchGame({ onFinish, onClose }) {
         style={{ width: "100%", maxWidth: 300, borderRadius: 16, touchAction: "none" }}
       />
       {status === "playing" && (
-        <div style={{ fontSize: 11, color: "#8a7a72", marginTop: 6 }}>Drag to move the nest · catch 🌾, dodge 🌵 (costs 3s)</div>
+        <div style={{ fontSize: 11, color: "var(--ink-soft)", marginTop: 6 }}>Drag to move the nest · catch 🌾, dodge 🌵 (costs 3s)</div>
       )}
       {status !== "playing" && (
         <div style={{ marginTop: 12 }}>

@@ -127,7 +127,7 @@ export default function WindRiderGame({ onFinish, onClose }) {
         style={{ width: "100%", maxWidth: 300, borderRadius: 16, touchAction: "none" }}
       />
       {status === "playing" && (
-        <div style={{ fontSize: 11, color: "#8a7a72", marginTop: 6 }}>Tap left/right to switch lanes · grab 🌾, dodge ⛈️</div>
+        <div style={{ fontSize: 11, color: "var(--ink-soft)", marginTop: 6 }}>Tap left/right to switch lanes · grab 🌾, dodge ⛈️</div>
       )}
       {status !== "playing" && (
         <div style={{ marginTop: 12 }}>

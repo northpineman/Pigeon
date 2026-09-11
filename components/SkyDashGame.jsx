@@ -146,7 +146,7 @@ export default function SkyDashGame({ onFinish, onClose }) {
         style={{ width: "100%", maxWidth: 300, borderRadius: 16, touchAction: "none" }}
       />
       {status === "playing" && (
-        <div style={{ fontSize: 11, color: "#8a7a72", marginTop: 6 }}>Tap or click to flap between the vines</div>
+        <div style={{ fontSize: 11, color: "var(--ink-soft)", marginTop: 6 }}>Tap or click to flap between the vines</div>
       )}
       {status !== "playing" && (
         <div style={{ marginTop: 12 }}>

@@ -156,7 +156,7 @@ export default function SeedBreakerGame({ onFinish, onClose }) {
         <span>Lives: {"❤️".repeat(Math.max(lives, 0))}</span>
       </div>
       <canvas ref={canvasRef} width={300} height={380} style={{ width: "100%", maxWidth: 300, borderRadius: 16, touchAction: "none" }} />
-      {status === "playing" && <div style={{ fontSize: 11, color: "#8a7a72", marginTop: 6 }}>Tap or click to launch the ball · drag to move the paddle</div>}
+      {status === "playing" && <div style={{ fontSize: 11, color: "var(--ink-soft)", marginTop: 6 }}>Tap or click to launch the ball · drag to move the paddle</div>}
       {status !== "playing" && (
         <div style={{ marginTop: 12 }}>
           <div style={{ fontFamily: "'Fraunces', serif", fontSize: 18, marginBottom: 8 }}>{status === "won" ? "Loft cleared! 🎉" : "Out of tries!"}</div>
