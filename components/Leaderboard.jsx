@@ -26,7 +26,7 @@ export default function Leaderboard({ myUsername }) {
   return (
     <div>
       <div style={{ textAlign: "center", marginBottom: 12 }}>
-        <div style={{ fontFamily: "'Fraunces', serif", fontSize: 20 }}>📊 Top Lofts</div>
+        <div style={{ fontFamily: "'Fraunces', serif", fontSize: 20 }}>📊 Top Wallows</div>
         <div style={{ fontSize: 12, color: "var(--ink-soft)" }}>Ranked by seeds saved up</div>
       </div>
       {error && <div style={{ fontSize: 12, color: "#B23A3A", textAlign: "center" }}>Couldn't load leaderboard: {error}</div>}
@@ -34,8 +34,9 @@ export default function Leaderboard({ myUsername }) {
       {rows && rows.length === 0 && <div style={{ textAlign: "center", fontSize: 13, color: "var(--ink-soft)" }}>No lofts yet — be the first!</div>}
       {rows &&
         rows.map((r, i) => (
-          <div
+          <a
             key={r.username + i}
+            href={`/profile/${encodeURIComponent(r.username)}`}
             style={{
               display: "flex",
               alignItems: "center",
@@ -45,13 +46,15 @@ export default function Leaderboard({ myUsername }) {
               padding: "8px 12px",
               marginBottom: 6,
               fontWeight: r.username === myUsername ? 800 : 600,
+              textDecoration: "none",
+              color: "inherit",
             }}
           >
             <div style={{ width: 24, textAlign: "center", fontSize: 13 }}>{i + 1}</div>
             <div style={{ flex: 1, fontSize: 13 }}>{r.username}</div>
-            <div style={{ fontSize: 12, color: "var(--ink-soft)" }}>{r.bird_count} birds</div>
+            <div style={{ fontSize: 12, color: "var(--ink-soft)" }}>{r.bird_count} capybaras</div>
             <div style={{ fontSize: 13, color: "var(--gold)", fontWeight: 800 }}>🌾 {r.seeds}</div>
-          </div>
+          </a>
         ))}
     </div>
   );

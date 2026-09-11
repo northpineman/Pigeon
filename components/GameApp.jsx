@@ -426,6 +426,7 @@ export default function GameApp({ user, profile, onSignOut }) {
           <div className="pills">
             <div className="pill">🌾 {seeds}</div>
             <div className="pill">🔥 {streak}</div>
+            <a className="pill" href={`/profile/${encodeURIComponent(profile.username)}`} title="My Profile" style={{ textDecoration: "none" }}>👤</a>
             <button className="pill" onClick={() => setShowAchievements(true)} title="Achievements">🏆</button>
             <button className="pill" onClick={() => setShowLeaderboard(true)} title="Leaderboard">📊</button>
             <button className="pill" onClick={() => setShowNotifications(true)} title="Notifications">🔔</button>
