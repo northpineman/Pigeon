@@ -60,7 +60,7 @@ export default function SeedBreakerGame({ onFinish, onClose }) {
 
     function loop() {
       if (done) return;
-      ctx.fillStyle = "#241B3A";
+      ctx.fillStyle = "#3E3350";
       ctx.fillRect(0, 0, W, H);
 
       s.bricks.forEach((b) => {
@@ -155,7 +155,9 @@ export default function SeedBreakerGame({ onFinish, onClose }) {
         <span>Score: {score}</span>
         <span>Lives: {"❤️".repeat(Math.max(lives, 0))}</span>
       </div>
-      <canvas ref={canvasRef} width={300} height={380} style={{ width: "100%", maxWidth: 300, borderRadius: 16, touchAction: "none" }} />
+      <div className="game-canvas-wrap">
+      <canvas ref={canvasRef} width={340} height={420} style={{ width: "100%", maxWidth: 340, borderRadius: 16, touchAction: "none" }} />
+      </div>
       {status === "playing" && <div style={{ fontSize: 11, color: "var(--ink-soft)", marginTop: 6 }}>Tap or click to launch the ball · drag to move the paddle</div>}
       {status !== "playing" && (
         <div style={{ marginTop: 12 }}>

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 
-const MATCH_SYMBOLS = ["🥚", "🕊️", "🌾", "🪺", "⭐", "🍬", "🌻", "🐦"];
+const MATCH_SYMBOLS = ["🐹", "🌾", "🌊", "🌿", "⭐", "🍬", "🌻", "🥕"];
 
 export default function NestMatchGame({ onFinish, onClose }) {
   const [cards, setCards] = useState(() => {

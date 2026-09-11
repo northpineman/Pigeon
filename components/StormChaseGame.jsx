@@ -100,15 +100,18 @@ export default function StormChaseGame({ onFinish, onClose }) {
 
       ctx.save();
       ctx.translate(bird.x, bird.y);
-      ctx.fillStyle = "#FFF3DC";
+      ctx.fillStyle = "#8a6a4a";
       ctx.beginPath();
-      ctx.ellipse(0, 0, 11, 8, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, 1, 12, 8, 0, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = canBoost ? "#FF7A59" : "#FFB100";
+      ctx.fillStyle = "#C9A876";
       ctx.beginPath();
-      ctx.moveTo(-10, -2);
-      ctx.lineTo(-18 - (canBoost ? 6 : 0), 0);
-      ctx.lineTo(-10, 3);
+      ctx.ellipse(-9, 2, 5, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = canBoost ? "#FF7A59" : "#6E7889";
+      ctx.beginPath();
+      ctx.arc(1, -6, 2, 0, Math.PI * 2);
+      ctx.arc(7, -6, 2, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
@@ -150,12 +153,14 @@ export default function StormChaseGame({ onFinish, onClose }) {
   return (
     <div style={{ textAlign: "center" }}>
       <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 8 }}>Distance: {distance}m · Storm: {storm}%</div>
+      <div className="game-canvas-wrap">
       <canvas
         ref={canvasRef}
-        width={300}
-        height={380}
-        style={{ width: "100%", maxWidth: 300, borderRadius: 16, touchAction: "none" }}
+        width={340}
+        height={420}
+        style={{ width: "100%", maxWidth: 340, borderRadius: 16, touchAction: "none" }}
       />
+      </div>
       {status === "playing" && (
         <div style={{ fontSize: 11, color: "var(--ink-soft)", marginTop: 6 }}>
           Drag to steer · hold to boost ahead of the storm (drains stamina)

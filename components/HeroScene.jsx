@@ -45,22 +45,23 @@ export default function HeroScene() {
       {/* rolling hills */}
       <path d="M0,150 C120,110 220,170 360,140 C500,110 600,160 760,130 C860,112 940,140 1000,128 L1000,220 L0,220 Z" fill="url(#hillGrad)" />
 
-      {/* distant rooftop silhouettes, dovecote-like */}
-      <g fill="#5B4636" opacity="0.28">
-        <rect x="80" y="128" width="26" height="30" />
-        <polygon points="72,128 118,128 95,108" />
-        <rect x="140" y="140" width="20" height="18" />
-        <polygon points="134,140 166,140 150,124" />
-        <rect x="860" y="132" width="30" height="26" />
-        <polygon points="852,132 900,132 876,110" />
-        <rect x="920" y="144" width="18" height="14" />
-        <polygon points="914,144 944,144 929,130" />
+      {/* reeds and cattails near the water's edge */}
+      <g stroke="#6E8B5A" strokeWidth="2.5" opacity="0.5" strokeLinecap="round">
+        <path d="M100,220 Q98,170 106,140" fill="none" />
+        <path d="M118,220 Q122,180 112,150" fill="none" />
+        <path d="M860,220 Q858,175 868,145" fill="none" />
+        <path d="M880,220 Q884,182 874,155" fill="none" />
       </g>
+      <ellipse cx="106" cy="136" rx="4" ry="9" fill="#7A5233" opacity="0.55" />
+      <ellipse cx="112" cy="146" rx="3.5" ry="8" fill="#7A5233" opacity="0.5" />
+      <ellipse cx="868" cy="141" rx="4" ry="9" fill="#7A5233" opacity="0.55" />
 
-      {/* perched birds */}
-      <g fill="#4B4560" opacity="0.55">
-        <path d="M108 122 q6 -8 14 -2 q4 -6 10 0 q-4 6 -12 6 q-8 2 -12 -4 Z" />
-        <path d="M878 118 q5 -7 12 -2 q3 -5 9 0 q-3 5 -10 5 q-7 2 -11 -3 Z" />
+      {/* a capybara or two lounging by the water */}
+      <g fill="#8a6a4a" opacity="0.5">
+        <ellipse cx="130" cy="160" rx="20" ry="11" />
+        <circle cx="112" cy="154" r="8" />
+        <circle cx="108" cy="149" r="2.2" />
+        <circle cx="146" cy="182" r="3.5" opacity="0.35" />
       </g>
 
       <rect x="0" y="0" width="1000" height="220" filter="url(#grain)" opacity="0.5" />

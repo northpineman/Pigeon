@@ -97,20 +97,23 @@ export default function SkyDashGame({ onFinish, onClose }) {
 
       ctx.save();
       ctx.translate(bird.x, bird.y);
-      ctx.rotate(Math.max(-0.5, Math.min(0.9, bird.vy * 0.08)));
-      ctx.fillStyle = "#FFF3DC";
+      ctx.rotate(Math.max(-0.35, Math.min(0.5, bird.vy * 0.05)));
+      ctx.fillStyle = "#8a6a4a";
       ctx.beginPath();
-      ctx.ellipse(0, 0, 11, 8, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, 1, 12, 8, 0, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = "#FFB100";
+      ctx.fillStyle = "#C9A876";
       ctx.beginPath();
-      ctx.moveTo(9, -1);
-      ctx.lineTo(17, 0);
-      ctx.lineTo(9, 3);
+      ctx.ellipse(9, 2, 5, 4, 0, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = "#8C6FE0";
+      ctx.fillStyle = "#3D3648";
       ctx.beginPath();
-      ctx.ellipse(-3, 2, 5, 3.5, 0.3, 0, Math.PI * 2);
+      ctx.arc(11, -1, 1.1, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#6E7889";
+      ctx.beginPath();
+      ctx.arc(1, -6, 2.2, 0, Math.PI * 2);
+      ctx.arc(7, -7, 2.2, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
@@ -139,19 +142,21 @@ export default function SkyDashGame({ onFinish, onClose }) {
   return (
     <div style={{ textAlign: "center" }}>
       <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 8 }}>Score: {score}</div>
+      <div className="game-canvas-wrap">
       <canvas
         ref={canvasRef}
-        width={300}
-        height={380}
-        style={{ width: "100%", maxWidth: 300, borderRadius: 16, touchAction: "none" }}
+        width={340}
+        height={420}
+        style={{ width: "100%", maxWidth: 340, borderRadius: 16, touchAction: "none" }}
       />
+      </div>
       {status === "playing" && (
-        <div style={{ fontSize: 11, color: "var(--ink-soft)", marginTop: 6 }}>Tap or click to flap between the vines</div>
+        <div style={{ fontSize: 11, color: "var(--ink-soft)", marginTop: 6 }}>Tap or click to bounce between the vines</div>
       )}
       {status !== "playing" && (
         <div style={{ marginTop: 12 }}>
           <div style={{ fontFamily: "'Fraunces', serif", fontSize: 18, marginBottom: 8 }}>
-            {score >= 8 ? "Great flying! 🎉" : "Grounded!"}
+            {score >= 8 ? "Great bouncing! 🎉" : "Grounded!"}
           </div>
           <button className="btn btn-primary" onClick={onClose}>Close</button>
         </div>

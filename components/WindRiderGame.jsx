@@ -46,7 +46,7 @@ export default function WindRiderGame({ onFinish, onClose }) {
       if (done) return;
       frame++;
 
-      ctx.fillStyle = "#241B3A";
+      ctx.fillStyle = "#3E3350";
       ctx.fillRect(0, 0, W, H);
       ctx.strokeStyle = "rgba(255,255,255,0.08)";
       for (let i = 1; i < LANES; i++) {
@@ -90,7 +90,7 @@ export default function WindRiderGame({ onFinish, onClose }) {
 
       ctx.font = "26px sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("🕊️", bird.x, bird.y);
+      ctx.fillText("🐹", bird.x, bird.y);
 
       if (done) {
         setStatus("lost");
@@ -120,12 +120,14 @@ export default function WindRiderGame({ onFinish, onClose }) {
         <span>Score: {score}</span>
         <span>Lives: {"❤️".repeat(Math.max(lives, 0))}</span>
       </div>
+      <div className="game-canvas-wrap">
       <canvas
         ref={canvasRef}
-        width={300}
-        height={380}
-        style={{ width: "100%", maxWidth: 300, borderRadius: 16, touchAction: "none" }}
+        width={340}
+        height={420}
+        style={{ width: "100%", maxWidth: 340, borderRadius: 16, touchAction: "none" }}
       />
+      </div>
       {status === "playing" && (
         <div style={{ fontSize: 11, color: "var(--ink-soft)", marginTop: 6 }}>Tap left/right to switch lanes · grab 🌾, dodge ⛈️</div>
       )}

@@ -106,7 +106,7 @@ export default function BloomBreakerGame({ onFinish, onClose }) {
 
   const finish = () => {
     const bonus = status === "cleared" ? 40 : 0;
-    onFinish(Math.max(6, Math.floor(score / 4) + bonus), status === "cleared");
+    onFinish(Math.max(6, Math.floor(score / 4) + bonus), status === "cleared", score);
   };
 
   useEffect(() => {
@@ -121,9 +121,9 @@ export default function BloomBreakerGame({ onFinish, onClose }) {
           display: "grid",
           gridTemplateColumns: `repeat(${COLS}, 1fr)`,
           gap: 3,
-          maxWidth: 300,
+          maxWidth: 340,
           margin: "0 auto",
-          background: "#241B3A",
+          background: "#3E3350",
           padding: 6,
           borderRadius: 12,
         }}
@@ -152,7 +152,7 @@ export default function BloomBreakerGame({ onFinish, onClose }) {
       </div>
       {status === "playing" && (
         <div style={{ fontSize: 11, color: "var(--ink-soft)", marginTop: 8 }}>
-          Tap a group of 2+ matching blooms to clear them · bigger groups score more
+          Tap a group of 2+ matching blooms to clear them · bigger groups score more · your best score unlocks bonus seeds
         </div>
       )}
       {status !== "playing" && (

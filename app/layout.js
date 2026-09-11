@@ -1,13 +1,13 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "PigeonsnDoves",
-  description: "Raise a loft of pigeons and doves — adopt, breed, decorate, and earn seeds.",
+  title: "CapyCove",
+  description: "Raise a wallow of capybaras — adopt, breed, decorate, and earn seeds.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "PigeonsnDoves",
+    title: "CapyCove",
   },
   icons: {
     icon: "/icons/icon-192.png",

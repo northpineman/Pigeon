@@ -112,12 +112,14 @@ export default function NestCatchGame({ onFinish, onClose }) {
         <span>Caught: {caught}</span>
         <span>Time: {timeLeft}s</span>
       </div>
+      <div className="game-canvas-wrap">
       <canvas
         ref={canvasRef}
-        width={300}
-        height={380}
-        style={{ width: "100%", maxWidth: 300, borderRadius: 16, touchAction: "none" }}
+        width={340}
+        height={420}
+        style={{ width: "100%", maxWidth: 340, borderRadius: 16, touchAction: "none" }}
       />
+      </div>
       {status === "playing" && (
         <div style={{ fontSize: 11, color: "var(--ink-soft)", marginTop: 6 }}>Drag to move the nest · catch 🌾, dodge 🌵 (costs 3s)</div>
       )}

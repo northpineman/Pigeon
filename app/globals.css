@@ -202,6 +202,31 @@ h1, h2, h3, .display {
   font-size: 15px;
 }
 
+.map-hotspot {
+  transition: transform 0.15s ease;
+  transform-origin: center;
+}
+.map-hotspot:hover {
+  transform: scale(1.035);
+}
+
+.game-canvas-wrap {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 340px;
+}
+.game-canvas-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  background-image: var(--grain);
+  opacity: 0.6;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
 /* ---------------------------- main content ---------------------------- */
 
 .content {
