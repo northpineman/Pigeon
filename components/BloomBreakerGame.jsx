@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
+import { sfx } from "@/lib/sfx";
+import GameResult from "./GameResult";
 
 const ROWS = 8;
 const COLS = 8;
@@ -78,30 +80,42 @@ function isCleared(grid) {
   return grid.every((row) => row.every((v) => !v));
 }
 
-export default function BloomBreakerGame({ onFinish, onClose }) {
+export default function BloomBreakerGame({ onFinish, onClose, onPlayAgain }) {
   const [grid, setGrid] = useState(makeGrid);
   const [score, setScore] = useState(0);
   const [status, setStatus] = useState("playing");
+  const [popping, setPopping] = useState(new Set());
+  const [busy, setBusy] = useState(false);
 
   const handleClick = (r, c) => {
-    if (status !== "playing") return;
+    if (status !== "playing" || busy) return;
     const group = floodFind(grid, r, c);
     if (group.length < 2) return;
 
-    const cleared = grid.map((row) => [...row]);
-    group.forEach(([gr, gc]) => (cleared[gr][gc] = null));
-    const settled = applyGravityAndCollapse(cleared);
+    setBusy(true);
+    const keys = new Set(group.map(([gr, gc]) => `${gr},${gc}`));
+    setPopping(keys);
+    if (group.length >= 10) sfx.success();
+    else sfx.pop();
 
-    const gained = group.length * group.length * 2;
-    const newScore = score + gained;
-    setScore(newScore);
-    setGrid(settled);
+    setTimeout(() => {
+      const cleared = grid.map((row) => [...row]);
+      group.forEach(([gr, gc]) => (cleared[gr][gc] = null));
+      const settled = applyGravityAndCollapse(cleared);
 
-    if (isCleared(settled)) {
-      setStatus("cleared");
-    } else if (!hasMoves(settled)) {
-      setStatus("stuck");
-    }
+      const gained = group.length * group.length * 2;
+      const newScore = score + gained;
+      setScore(newScore);
+      setGrid(settled);
+      setPopping(new Set());
+      setBusy(false);
+
+      if (isCleared(settled)) {
+        setStatus("cleared");
+      } else if (!hasMoves(settled)) {
+        setStatus("stuck");
+      }
+    }, 160);
   };
 
   const finish = () => {
@@ -110,8 +124,14 @@ export default function BloomBreakerGame({ onFinish, onClose }) {
   };
 
   useEffect(() => {
-    if (status === "cleared" || status === "stuck") finish();
+    if (status === "cleared" || status === "stuck") {
+      finish();
+      if (status === "cleared") sfx.success();
+      else sfx.fail();
+    }
   }, [status]); // eslint-disable-line
+
+  const stars = status === "cleared" ? 3 : score >= 140 ? 2 : score >= 15 ? 1 : 0;
 
   return (
     <div style={{ textAlign: "center" }}>
@@ -129,25 +149,30 @@ export default function BloomBreakerGame({ onFinish, onClose }) {
         }}
       >
         {grid.map((row, r) =>
-          row.map((type, c) => (
-            <div
-              key={`${r}-${c}`}
-              onClick={() => handleClick(r, c)}
-              style={{
-                aspectRatio: "1",
-                borderRadius: 6,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 15,
-                cursor: type ? "pointer" : "default",
-                background: type ? TYPE_BG[type] + "33" : "transparent",
-                transition: "background 0.15s",
-              }}
-            >
-              {type || ""}
-            </div>
-          ))
+          row.map((type, c) => {
+            const isPopping = popping.has(`${r},${c}`);
+            return (
+              <div
+                key={`${r}-${c}`}
+                onClick={() => handleClick(r, c)}
+                style={{
+                  aspectRatio: "1",
+                  borderRadius: 6,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 15,
+                  cursor: type ? "pointer" : "default",
+                  background: type ? TYPE_BG[type] + "33" : "transparent",
+                  transform: isPopping ? "scale(1.6)" : "scale(1)",
+                  opacity: isPopping ? 0 : 1,
+                  transition: "transform 0.16s ease, opacity 0.16s ease, background 0.15s",
+                }}
+              >
+                {type || ""}
+              </div>
+            );
+          })
         )}
       </div>
       {status === "playing" && (
@@ -156,12 +181,13 @@ export default function BloomBreakerGame({ onFinish, onClose }) {
         </div>
       )}
       {status !== "playing" && (
-        <div style={{ marginTop: 12 }}>
-          <div style={{ fontFamily: "'Fraunces', serif", fontSize: 18, marginBottom: 8 }}>
-            {status === "cleared" ? "Board cleared! 🎉" : "No more matches left!"}
-          </div>
-          <button className="btn btn-primary" onClick={onClose}>Close</button>
-        </div>
+        <GameResult
+          stars={stars}
+          title={status === "cleared" ? "Board cleared! 🎉" : "No more matches left!"}
+          subtitle={`Score: ${score}`}
+          onPlayAgain={onPlayAgain}
+          onClose={onClose}
+        />
       )}
     </div>
   );

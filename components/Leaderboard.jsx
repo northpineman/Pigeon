@@ -26,7 +26,7 @@ export default function Leaderboard({ myUsername }) {
   return (
     <div>
       <div style={{ textAlign: "center", marginBottom: 12 }}>
-        <div style={{ fontFamily: "'Fraunces', serif", fontSize: 20 }}>📊 Top Wallows</div>
+        <div style={{ fontFamily: "'Fraunces', serif", fontSize: 20 }}>📊 Top Kennels</div>
         <div style={{ fontSize: 12, color: "var(--ink-soft)" }}>Ranked by seeds saved up</div>
       </div>
       {error && <div style={{ fontSize: 12, color: "#B23A3A", textAlign: "center" }}>Couldn't load leaderboard: {error}</div>}
@@ -52,7 +52,7 @@ export default function Leaderboard({ myUsername }) {
           >
             <div style={{ width: 24, textAlign: "center", fontSize: 13 }}>{i + 1}</div>
             <div style={{ flex: 1, fontSize: 13 }}>{r.username}</div>
-            <div style={{ fontSize: 12, color: "var(--ink-soft)" }}>{r.bird_count} capybaras</div>
+            <div style={{ fontSize: 12, color: "var(--ink-soft)" }}>{r.bird_count} Iggies</div>
             <div style={{ fontSize: 13, color: "var(--gold)", fontWeight: 800 }}>🌾 {r.seeds}</div>
           </a>
         ))}

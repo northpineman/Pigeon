@@ -1,9 +1,11 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { sfx } from "@/lib/sfx";
+import GameResult from "./GameResult";
 
 const LANES = 3;
 
-export default function WindRiderGame({ onFinish, onClose }) {
+export default function WindRiderGame({ onFinish, onClose, onPlayAgain }) {
   const canvasRef = useRef(null);
   const rafRef = useRef(null);
   const [score, setScore] = useState(0);
@@ -76,9 +78,11 @@ export default function WindRiderGame({ onFinish, onClose }) {
             localScore += 2;
             setSeedsCaught(localSeeds);
             setScore(localScore);
+            sfx.collect();
           } else {
             localLives -= 1;
             setLives(localLives);
+            sfx.hit();
             if (localLives <= 0) done = true;
           }
         }
@@ -90,7 +94,7 @@ export default function WindRiderGame({ onFinish, onClose }) {
 
       ctx.font = "26px sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("🐹", bird.x, bird.y);
+      ctx.fillText("🐕", bird.x, bird.y);
 
       if (done) {
         setStatus("lost");
@@ -111,8 +115,12 @@ export default function WindRiderGame({ onFinish, onClose }) {
   useEffect(() => {
     if (status === "lost") {
       onFinish(Math.max(6, Math.floor(score) + seedsCaught), score >= 20);
+      if (score >= 20) sfx.success();
+      else sfx.fail();
     }
   }, [status]); // eslint-disable-line
+
+  const stars = score >= 20 ? 3 : score >= 10 ? 2 : score >= 1 ? 1 : 0;
 
   return (
     <div style={{ textAlign: "center" }}>
@@ -132,12 +140,13 @@ export default function WindRiderGame({ onFinish, onClose }) {
         <div style={{ fontSize: 11, color: "var(--ink-soft)", marginTop: 6 }}>Tap left/right to switch lanes · grab 🌾, dodge ⛈️</div>
       )}
       {status !== "playing" && (
-        <div style={{ marginTop: 12 }}>
-          <div style={{ fontFamily: "'Fraunces', serif", fontSize: 18, marginBottom: 8 }}>
-            {score >= 20 ? "Rode the wind! 🎉" : "Blown off course!"}
-          </div>
-          <button className="btn btn-primary" onClick={onClose}>Close</button>
-        </div>
+        <GameResult
+          stars={stars}
+          title={score >= 20 ? "Rode the wind! 🎉" : "Blown off course!"}
+          subtitle={`Score: ${score} · ${seedsCaught} seeds caught`}
+          onPlayAgain={onPlayAgain}
+          onClose={onClose}
+        />
       )}
     </div>
   );

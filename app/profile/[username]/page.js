@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import CapybaraSVG from "@/components/CapybaraSVG";
+import PetArt from "@/components/PetArt";
 
 export default function ProfilePage() {
   const params = useParams();
@@ -21,7 +21,7 @@ export default function ProfilePage() {
       ]);
       if (!active) return;
       if (pErr || !p) {
-        setError("Couldn't find a wallow for that username.");
+        setError("Couldn't find a kennel for that username.");
         return;
       }
       setProfile(p);
@@ -36,7 +36,7 @@ export default function ProfilePage() {
     <div className="site">
       <header className="site-header">
         <div className="brand">
-          <h1>🐹 CapyCove</h1>
+          <h1>🐕 Iggy Meadow</h1>
         </div>
         <a href="/" className="btn btn-ghost" style={{ fontSize: 12, padding: "7px 12px" }}>
           ← Back to the game
@@ -51,7 +51,7 @@ export default function ProfilePage() {
         {profile && (
           <>
             <div style={{ textAlign: "center", marginBottom: 22 }}>
-              <div style={{ fontFamily: "'Fraunces', serif", fontSize: 26 }}>{profile.username}'s Wallow</div>
+              <div style={{ fontFamily: "'Fraunces', serif", fontSize: 26 }}>{profile.username}'s Kennel</div>
               <div style={{ fontSize: 12.5, color: "var(--ink-soft)", marginTop: 4 }}>
                 Joined {new Date(profile.created_at).toLocaleDateString(undefined, { month: "long", year: "numeric" })}
               </div>
@@ -68,8 +68,8 @@ export default function ProfilePage() {
               <div className="market-item">
                 <div style={{ fontSize: 20 }}>🐹</div>
                 <div className="info">
-                  <div className="nm">{(profile.birds || []).length} capybaras</div>
-                  <div className="sub">Wallow capacity: {profile.loft_capacity}</div>
+                  <div className="nm">{(profile.birds || []).length} Iggies</div>
+                  <div className="sub">Kennel capacity: {profile.loft_capacity}</div>
                 </div>
               </div>
               {profile.bloombreaker_best > 0 && (
@@ -83,14 +83,14 @@ export default function ProfilePage() {
               )}
             </div>
 
-            <div className="section-title">The Capybaras</div>
+            <div className="section-title">The Iggies</div>
             {(profile.birds || []).length === 0 ? (
-              <div style={{ fontSize: 13, color: "var(--ink-soft)" }}>No capybaras here yet.</div>
+              <div style={{ fontSize: 13, color: "var(--ink-soft)" }}>No Iggies here yet.</div>
             ) : (
               <div className="loft-grid" style={{ marginBottom: 26 }}>
                 {profile.birds.map((b) => (
                   <div className="bird-card" key={b.id}>
-                    <CapybaraSVG speciesKey={b.speciesKey} colorKey={b.colorKey} stage={b.stage === "egg" ? "egg" : "adult"} size={58} />
+                    <PetArt speciesKey={b.speciesKey} colorKey={b.colorKey} stage={b.stage === "egg" ? "egg" : "adult"} size={58} />
                     <div className="bname">{b.name || "Unnamed"}</div>
                     <div className="bspecies">{b.gender === "m" ? "♂" : "♀"}</div>
                   </div>

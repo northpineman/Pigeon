@@ -27,8 +27,8 @@ export default function LoginPage() {
   return (
     <div className="page">
       <div className="auth-card">
-        <div style={{ fontSize: 40 }}>🐹</div>
-        <h1>🐹 CapyCove</h1>
+        <div style={{ fontSize: 40 }}>🐕</div>
+        <h1>🐕 Iggy Meadow</h1>
         <div className="sub">Log in to visit your loft</div>
 
         {error && <div className="auth-error">{error}</div>}

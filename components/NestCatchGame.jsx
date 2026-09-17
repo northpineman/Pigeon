@@ -1,10 +1,12 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { clamp } from "@/lib/gameData";
+import { sfx } from "@/lib/sfx";
+import GameResult from "./GameResult";
 
 const ROUND_SECONDS = 45;
 
-export default function NestCatchGame({ onFinish, onClose }) {
+export default function NestCatchGame({ onFinish, onClose, onPlayAgain }) {
   const canvasRef = useRef(null);
   const rafRef = useRef(null);
   const [caught, setCaught] = useState(0);
@@ -63,9 +65,11 @@ export default function NestCatchGame({ onFinish, onClose }) {
           d.hit = true;
           if (d.isBad) {
             secondsLeft = Math.max(0, secondsLeft - 3 * 60);
+            sfx.hit();
           } else {
             localCaught += 1;
             setCaught(localCaught);
+            sfx.collect();
           }
         }
       });
@@ -103,8 +107,12 @@ export default function NestCatchGame({ onFinish, onClose }) {
   useEffect(() => {
     if (status === "done") {
       onFinish(Math.max(6, caught * 3), caught >= 20);
+      if (caught >= 20) sfx.success();
+      else sfx.fail();
     }
   }, [status]); // eslint-disable-line
+
+  const stars = caught >= 20 ? 3 : caught >= 10 ? 2 : caught >= 3 ? 1 : 0;
 
   return (
     <div style={{ textAlign: "center" }}>
@@ -124,12 +132,13 @@ export default function NestCatchGame({ onFinish, onClose }) {
         <div style={{ fontSize: 11, color: "var(--ink-soft)", marginTop: 6 }}>Drag to move the nest · catch 🌾, dodge 🌵 (costs 3s)</div>
       )}
       {status !== "playing" && (
-        <div style={{ marginTop: 12 }}>
-          <div style={{ fontFamily: "'Fraunces', serif", fontSize: 18, marginBottom: 8 }}>
-            {caught >= 20 ? "Great harvest! 🎉" : "Time's up!"}
-          </div>
-          <button className="btn btn-primary" onClick={onClose}>Close</button>
-        </div>
+        <GameResult
+          stars={stars}
+          title={caught >= 20 ? "Great harvest! 🎉" : "Time's up!"}
+          subtitle={`Caught: ${caught}`}
+          onPlayAgain={onPlayAgain}
+          onClose={onClose}
+        />
       )}
     </div>
   );

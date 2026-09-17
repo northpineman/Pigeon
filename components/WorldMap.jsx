@@ -65,13 +65,13 @@ export default function WorldMap({ onEnterHalloween, onEnterChristmas, onGoGames
           <text x="650" y="185" textAnchor="middle" fontSize="12" fontWeight="700" fill="#3E5670">Christmas Shop · tap to enter</text>
         </g>
 
-        {/* ---------------- The Wallow (center, home) ---------------- */}
+        {/* ---------------- The Kennel (center, home) ---------------- */}
         <g>
           <ellipse cx="400" cy="330" rx="130" ry="90" fill="url(#homeGround)" stroke="#6a9c78" strokeWidth="2.5" />
           <ellipse cx="400" cy="320" rx="55" ry="26" fill="#A9CDE0" stroke="#5B8AA0" strokeWidth="2" />
           <ellipse cx="380" cy="316" rx="12" ry="7" fill="#8a6a4a" />
           <circle cx="368" cy="311" r="5" fill="#8a6a4a" />
-          <text x="400" y="380" textAnchor="middle" fontFamily="Fraunces, serif" fontSize="16" fontWeight="700" fill="#3F6B4B">The Wallow (home)</text>
+          <text x="400" y="380" textAnchor="middle" fontFamily="Fraunces, serif" fontSize="16" fontWeight="700" fill="#3F6B4B">The Kennel (home)</text>
         </g>
 
         {/* ---------------- Arcade Lane (bottom left) ---------------- */}

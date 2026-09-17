@@ -1,8 +1,10 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { clamp } from "@/lib/gameData";
+import { sfx } from "@/lib/sfx";
+import GameResult from "./GameResult";
 
-export default function SeedBreakerGame({ onFinish, onClose }) {
+export default function SeedBreakerGame({ onFinish, onClose, onPlayAgain }) {
   const canvasRef = useRef(null);
   const rafRef = useRef(null);
   const [score, setScore] = useState(0);
@@ -102,6 +104,7 @@ export default function SeedBreakerGame({ onFinish, onClose }) {
           s.ball.vy *= -1;
           localScore += 10;
           setScore(localScore);
+          sfx.pop();
           break;
         }
       }
@@ -115,6 +118,8 @@ export default function SeedBreakerGame({ onFinish, onClose }) {
         if (localLives <= 0) {
           done = true;
           setStatus("lost");
+        } else {
+          sfx.hit();
         }
       }
 
@@ -146,8 +151,12 @@ export default function SeedBreakerGame({ onFinish, onClose }) {
     if (status === "won" || status === "lost") {
       const winBonus = status === "won" ? 25 : 0;
       onFinish(Math.floor(score / 10) + winBonus, status === "won");
+      if (status === "won") sfx.success();
+      else sfx.fail();
     }
   }, [status]); // eslint-disable-line
+
+  const stars = status === "won" ? 3 : score >= 200 ? 2 : score >= 60 ? 1 : 0;
 
   return (
     <div style={{ textAlign: "center" }}>
@@ -160,10 +169,13 @@ export default function SeedBreakerGame({ onFinish, onClose }) {
       </div>
       {status === "playing" && <div style={{ fontSize: 11, color: "var(--ink-soft)", marginTop: 6 }}>Tap or click to launch the ball · drag to move the paddle</div>}
       {status !== "playing" && (
-        <div style={{ marginTop: 12 }}>
-          <div style={{ fontFamily: "'Fraunces', serif", fontSize: 18, marginBottom: 8 }}>{status === "won" ? "Loft cleared! 🎉" : "Out of tries!"}</div>
-          <button className="btn btn-primary" onClick={onClose}>Close</button>
-        </div>
+        <GameResult
+          stars={stars}
+          title={status === "won" ? "Kennel cleared! 🎉" : "Out of tries!"}
+          subtitle={`Score: ${score}`}
+          onPlayAgain={onPlayAgain}
+          onClose={onClose}
+        />
       )}
     </div>
   );

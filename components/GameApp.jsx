@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import CapybaraSVG from "./CapybaraSVG";
+import PetArt from "./PetArt";
 import { StatBar, Modal } from "./ui";
 import SeedBreakerGame from "./SeedBreakerGame";
 import NestMatchGame from "./NestMatchGame";
@@ -9,16 +9,19 @@ import SkyDashGame from "./SkyDashGame";
 import WindRiderGame from "./WindRiderGame";
 import StormChaseGame from "./StormChaseGame";
 import BloomBreakerGame from "./BloomBreakerGame";
-import CapybaraTriviaGame from "./CapybaraTriviaGame";
+import IggyTriviaGame from "./IggyTriviaGame";
 import NestCatchGame from "./NestCatchGame";
 import AdminPanel from "./AdminPanel";
 import Achievements from "./Achievements";
 import Leaderboard from "./Leaderboard";
 import PushOptIn from "./PushOptIn";
-import { SPECIES, TABS, DEFAULT_CONFIG, HOUR, LOFT_BASE_CAPACITY, CAPACITY_PER_UPGRADE, pickRandom, todayStr, yesterdayStr, pickRandomName, computeHunger, computeClean, computeHappiness, pendingIncome, adoptCost, upgradeCost, formatDuration, makeBird, defaultBirds, computeUnlockedKeys, ACHIEVEMENT_REWARDS } from "@/lib/gameData";
+import { SPECIES, TABS, DEFAULT_CONFIG, HOUR, LOFT_BASE_CAPACITY, CAPACITY_PER_UPGRADE, pickRandom, todayStr, yesterdayStr, pickRandomName, computeHunger, computeClean, computeHappiness, pendingIncome, adoptCost, upgradeCost, formatDuration, makeBird, defaultBirds, computeUnlockedKeys, ACHIEVEMENT_REWARDS, BOTS, getLife, getMaxLife, getStrength, getWisdom } from "@/lib/gameData";
 import { theme } from "@/lib/theme";
 import HeroScene from "./HeroScene";
 import WorldMap from "./WorldMap";
+import HarvestWheel from "./HarvestWheel";
+import Explore from "./Explore";
+import { sfx } from "@/lib/sfx";
 
 export default function GameApp({ user, profile, onSignOut }) {
   const [loaded, setLoaded] = useState(false);
@@ -47,6 +50,8 @@ export default function GameApp({ user, profile, onSignOut }) {
   const [toast, setToast] = useState(null);
   const [renameDraft, setRenameDraft] = useState("");
   const [activeGame, setActiveGame] = useState(null);
+  const [gameRound, setGameRound] = useState(0);
+  const restartActiveGame = () => setGameRound((r) => r + 1);
   const [showAchievements, setShowAchievements] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -244,12 +249,12 @@ export default function GameApp({ user, profile, onSignOut }) {
     if (pending <= 0) return;
     setSeeds((s) => s + pending);
     setLastCollectAt(now);
-    notify(`+${pending} seeds gathered from the wallow`);
+    notify(`+${pending} seeds gathered from the kennel`);
   };
 
   const handleFeed = (id) => {
     if (seeds < config.feedCost) return notify("You're a bit short on seeds for feed");
-    setBirds((prev) => prev.map((b) => (b.id === id ? { ...b, lastFedAt: Date.now() } : b)));
+    setBirds((prev) => prev.map((b) => (b.id === id ? { ...b, lastFedAt: Date.now(), life: Math.min(getMaxLife(b), getLife(b) + 30) } : b)));
     setSeeds((s) => s - config.feedCost);
   };
 
@@ -259,7 +264,7 @@ export default function GameApp({ user, profile, onSignOut }) {
 
   const handleAdopt = (speciesKey) => {
     const cost = adoptCost(config, speciesKey, birds.length);
-    if (birds.length >= loftCapacity) return notify("Your loft is full — upgrade for more room");
+    if (birds.length >= loftCapacity) return notify("Your kennel is full — upgrade for more room");
     if (seeds < cost) return notify("You're a bit short on seeds");
     const colorKey = pickRandom(SPECIES[speciesKey].colors);
     const t = Date.now();
@@ -267,11 +272,11 @@ export default function GameApp({ user, profile, onSignOut }) {
     bird.name = pickRandomName(usedNames);
     setBirds((prev) => [...prev, bird]);
     setSeeds((s) => s - cost);
-    notify(`${bird.name} has joined the wallow! 🐹`);
+    notify(`${bird.name} has joined the kennel! 🐕`);
   };
 
   const handleAdoptSeasonal = (sb) => {
-    if (birds.length >= loftCapacity) return notify("Your loft is full — upgrade for more room");
+    if (birds.length >= loftCapacity) return notify("Your kennel is full — upgrade for more room");
     if (seeds < sb.cost) return notify("You're a bit short on seeds");
     const t = Date.now();
     const bird = makeBird({ speciesKey: sb.speciesKey, colorKey: sb.colorKey, stage: "baby", now: t, growAt: t + config.adoptGrowHours * HOUR });
@@ -279,7 +284,111 @@ export default function GameApp({ user, profile, onSignOut }) {
     setBirds((prev) => [...prev, bird]);
     setSeeds((s) => s - sb.cost);
     setFlags((prev) => ({ ...prev, seasonalAdopted: true }));
-    notify(`${bird.name} has joined the wallow! 🐹`);
+    notify(`${bird.name} has joined the kennel! 🐕`);
+  };
+
+  const halloweenSeasonalBirds = config.seasonalBirds.filter((b) => b.season === "halloween");
+  const findSeasonal = (key) => halloweenSeasonalBirds.find((b) => b.key === key);
+  const halloweenWheelPrizes = [
+    { key: "seeds10", label: "10 seeds", emoji: "🌾", weight: 25, rarity: "common", kind: "seeds", amount: 10 },
+    { key: "seeds25", label: "25 seeds", emoji: "🌾", weight: 20, rarity: "common", kind: "seeds", amount: 25 },
+    { key: "decor", label: "Random Halloween decoration", emoji: "🎃", weight: 15, rarity: "uncommon", kind: "decor" },
+    { key: "raven", label: "Raven Iggy", emoji: "🐦", weight: 12, rarity: "uncommon", kind: "bird", sb: findSeasonal("sb-raven") },
+    { key: "jack", label: "Jack-o'-Iggy", emoji: "🎃", weight: 12, rarity: "uncommon", kind: "bird", sb: findSeasonal("sb-jack") },
+    { key: "candycorn", label: "Candy Corn Iggy", emoji: "🍬", weight: 12, rarity: "uncommon", kind: "bird", sb: findSeasonal("sb-candycorn") },
+    { key: "ghost", label: "Ghost Iggy", emoji: "👻", weight: 4, rarity: "rare", kind: "bird", sb: findSeasonal("sb-ghost") },
+  ].filter((p) => p.kind !== "bird" || p.sb);
+
+  const handleWheelResult = (prize, cost) => {
+    setSeeds((s) => s - cost);
+
+    if (prize.kind === "seeds") {
+      setSeeds((s) => s + prize.amount);
+      notify(`+${prize.amount} seeds from the wheel! 🌾`);
+      return;
+    }
+
+    if (prize.kind === "decor") {
+      const unowned = config.halloweenItems.filter((d) => !decorations.includes(d.key));
+      if (unowned.length === 0) {
+        setSeeds((s) => s + 30);
+        notify("Already have every decoration — +30 seeds instead!");
+        return;
+      }
+      const d = unowned[Math.floor(Math.random() * unowned.length)];
+      setDecorations((prev) => [...prev, d.key]);
+      notify(`Won a decoration: ${d.name}! 🎃`);
+      return;
+    }
+
+    if (prize.kind === "bird") {
+      if (birds.length >= loftCapacity) {
+        setSeeds((s) => s + 50);
+        notify("Your kennel is full — +50 seeds instead!");
+        return;
+      }
+      const t = Date.now();
+      const bird = makeBird({ speciesKey: prize.sb.speciesKey, colorKey: prize.sb.colorKey, stage: "baby", now: t, growAt: t + config.adoptGrowHours * HOUR });
+      bird.name = pickRandomName(usedNames);
+      setBirds((prev) => [...prev, bird]);
+      setFlags((prev) => ({ ...prev, seasonalAdopted: true }));
+      notify(`${bird.name} the ${prize.sb.name} has joined the kennel! 🐕`);
+    }
+  };
+
+  const [explorerId, setExplorerId] = useState(null);
+  const potions = flags.potions || 0;
+  const books = flags.books || 0;
+  const exploreStage = flags.exploreStage || 0;
+
+  const handleBuyTrainingItem = (item) => {
+    if (seeds < item.cost) return notify("You're a bit short on seeds");
+    setSeeds((s) => s - item.cost);
+    const key = item.stat === "strength" ? "potions" : "books";
+    setFlags((prev) => ({ ...prev, [key]: (prev[key] || 0) + 1 }));
+    notify(`Bought a ${item.name}! 🎒`);
+  };
+
+  const handleUseTrainingItem = (petId, stat) => {
+    const key = stat === "strength" ? "potions" : "books";
+    if ((flags[key] || 0) <= 0) return;
+    setFlags((prev) => ({ ...prev, [key]: prev[key] - 1 }));
+    setBirds((prev) => prev.map((b) => (b.id === petId ? { ...b, [stat]: (stat === "strength" ? getStrength(b) : getWisdom(b)) + 2 } : b)));
+    notify(stat === "strength" ? "+2 Strength! 💪" : "+2 Wisdom! 📖");
+  };
+
+  const handleBattle = (petId) => {
+    const bot = BOTS[Math.min(exploreStage, BOTS.length - 1)];
+    const pet = birds.find((b) => b.id === petId);
+    if (!pet || getLife(pet) <= 0) return { won: false, message: "Too weak to battle right now." };
+
+    const petPower = getStrength(pet) * 2 + getWisdom(pet) + Math.random() * 10;
+    const botPower = bot.power + Math.random() * 10;
+    const won = petPower >= botPower;
+
+    const damage = won
+      ? Math.max(3, Math.round(5 + Math.random() * 10 - getWisdom(pet) / 2))
+      : Math.max(8, Math.round(15 + Math.random() * 15 - getWisdom(pet) / 3));
+
+    const newLife = Math.max(0, getLife(pet) - damage);
+    setBirds((prev) => prev.map((b) => (b.id === petId ? { ...b, life: newLife } : b)));
+
+    if (won) {
+      setSeeds((s) => s + bot.seedReward);
+      let itemMsg = "";
+      if (Math.random() < bot.itemChance) {
+        const stat = Math.random() < 0.5 ? "potions" : "books";
+        setFlags((prev) => ({ ...prev, [stat]: (prev[stat] || 0) + 1, exploreStage: Math.min(BOTS.length, exploreStage + 1) }));
+        itemMsg = stat === "potions" ? " Found a Strength Potion!" : " Found a Wisdom Book!";
+      } else {
+        setFlags((prev) => ({ ...prev, exploreStage: Math.min(BOTS.length, exploreStage + 1) }));
+      }
+      sfx.success();
+      return { won: true, message: `Beat ${bot.name}! +${bot.seedReward} seeds.${itemMsg} (-${damage} life)` };
+    } else {
+      sfx.fail();
+      return { won: false, message: `${bot.name} was too strong this time. (-${damage} life)` };
+    }
   };
 
   const toggleBreedSelect = (id) => {
@@ -299,7 +408,7 @@ export default function GameApp({ user, profile, onSignOut }) {
 
   const handleBreed = () => {
     if (!canBreed) return;
-    if (birds.length >= loftCapacity) return notify("Your loft is full — upgrade for more room");
+    if (birds.length >= loftCapacity) return notify("Your kennel is full — upgrade for more room");
     if (seeds < config.breedCost) return notify("You're a bit short on seeds");
     const t = Date.now();
     const [idA, idB] = breedSelection;
@@ -323,7 +432,7 @@ export default function GameApp({ user, profile, onSignOut }) {
     setSeeds((s) => s - cost);
     setLoftCapacity((c) => c + CAPACITY_PER_UPGRADE);
     setUpgradesBought((n) => n + 1);
-    notify("Wallow expanded — more room for capybaras");
+    notify("Kennel expanded — more room for Iggies");
   };
 
   const handleBuyDecor = (key, cost) => {
@@ -331,7 +440,7 @@ export default function GameApp({ user, profile, onSignOut }) {
     if (seeds < cost) return notify("You're a bit short on seeds");
     setSeeds((s) => s - cost);
     setDecorations((prev) => [...prev, key]);
-    notify("Placed in your wallow");
+    notify("Placed in your kennel");
   };
 
   const handleRename = (id) => {
@@ -409,7 +518,7 @@ export default function GameApp({ user, profile, onSignOut }) {
       <div className="site">
         <div className="loading-screen">
           <div className="em">🐹</div>
-          <div className="display" style={{ fontWeight: 700 }}>Waking the capybaras…</div>
+          <div className="display" style={{ fontWeight: 700 }}>Waking the Iggies…</div>
         </div>
       </div>
     );
@@ -419,7 +528,7 @@ export default function GameApp({ user, profile, onSignOut }) {
     <div className="site">
       <header className="site-header">
         <div className="brand">
-          <h1>🐹 CapyCove</h1>
+          <h1>🐕 Iggy Meadow</h1>
           <span className="handle">@{profile.username}</span>
         </div>
         <div className="header-actions">
@@ -459,7 +568,7 @@ export default function GameApp({ user, profile, onSignOut }) {
         <div className="hero-inner">
           <div className="income-strip">
             <div>
-              <div className="label">Wallow income</div>
+              <div className="label">Kennel income</div>
               <div className="amount">+{pending} seeds</div>
             </div>
             <button className="btn btn-primary" onClick={handleCollect} disabled={pending <= 0}>
@@ -495,7 +604,7 @@ export default function GameApp({ user, profile, onSignOut }) {
                   const busy = b.breedingUntil && b.breedingUntil > now;
                   return (
                     <div key={b.id} className={`bird-card${busy ? " busy" : ""}`} onClick={() => setSelectedBirdId(b.id)}>
-                      <CapybaraSVG speciesKey={b.speciesKey} colorKey={b.colorKey} stage={b.stage} size={58} />
+                      <PetArt speciesKey={b.speciesKey} colorKey={b.colorKey} stage={b.stage} size={58} />
                       <div className="bname">{b.name || "?"}</div>
                       <div className="bspecies">
                         {b.stage === "egg" ? `hatches ${formatDuration(b.hatchAt - now)}` : b.stage === "baby" ? `growing ${formatDuration(b.growAt - now)}` : SPECIES[b.speciesKey].name}
@@ -505,7 +614,7 @@ export default function GameApp({ user, profile, onSignOut }) {
                   );
                 })}
                 {Array.from({ length: Math.max(0, loftCapacity - birds.length) }).map((_, i) => (
-                  <div className="empty-slot" key={i}>An empty spot — adopt or breed a capybara to fill it</div>
+                  <div className="empty-slot" key={i}>An empty spot — adopt or breed an Iggy to fill it</div>
                 ))}
               </div>
             </>
@@ -520,11 +629,11 @@ export default function GameApp({ user, profile, onSignOut }) {
 
               {nestsSubtab === "adopt" ? (
                 <>
-                  <div className="section-title">Adopt a Capybara</div>
+                  <div className="section-title">Adopt an Iggy</div>
                   <div className="item-grid">
                   {Object.entries(SPECIES).map(([key, sp]) => (
                     <div className="market-item" key={key}>
-                      <CapybaraSVG speciesKey={key} colorKey={sp.colors[0]} stage="adult" size={46} />
+                      <PetArt speciesKey={key} colorKey={sp.colors[0]} stage="adult" size={46} />
                       <div className="info">
                         <div className="nm">{sp.name}</div>
                         <div className="sub">{adoptCost(config, key, birds.length)} seeds</div>
@@ -538,7 +647,7 @@ export default function GameApp({ user, profile, onSignOut }) {
                 </>
               ) : (
                 <>
-                  <div className="section-title">Pair Up Two Capybaras</div>
+                  <div className="section-title">Pair Up Two Iggies</div>
                   <div style={{ fontSize: 12, color: "var(--ink-soft)", marginBottom: 10 }}>
                     Pick one male ♂ and one female ♀ adult bird. Nesting costs {config.breedCost} seeds and takes {formatDuration(config.eggHatchHours * HOUR)}.
                   </div>
@@ -547,7 +656,7 @@ export default function GameApp({ user, profile, onSignOut }) {
                     const selected = breedSelection.includes(b.id);
                     return (
                       <div key={b.id} className={`breed-row${selected ? " selected" : ""}${busy ? " disabled" : ""}`} onClick={() => !busy && toggleBreedSelect(b.id)}>
-                        <CapybaraSVG speciesKey={b.speciesKey} colorKey={b.colorKey} stage="adult" size={40} />
+                        <PetArt speciesKey={b.speciesKey} colorKey={b.colorKey} stage="adult" size={40} />
                         <div style={{ flex: 1 }}>
                           <div style={{ fontWeight: 800, fontSize: 13 }}>
                             {b.name} <span className={`gender ${b.gender}`}>{b.gender === "m" ? "♂" : "♀"}</span>
@@ -611,24 +720,44 @@ export default function GameApp({ user, profile, onSignOut }) {
               })}
               </div>
 
-              <div className="section-title" style={{ marginTop: 16 }}>Exclusive capybaras</div>
-              <div className="item-grid">
-              {config.seasonalBirds.filter((b) => b.season === eventsSubtab).map((sb) => (
-                <div className="market-item" key={sb.key}>
-                  <CapybaraSVG speciesKey={sb.speciesKey} colorKey={sb.colorKey} stage="adult" size={46} />
-                  <div className="info">
-                    <div className="nm">{sb.name}</div>
-                    <div className="sub">{sb.cost} seeds</div>
-                  </div>
-                  <button className="btn btn-primary" onClick={() => handleAdoptSeasonal(sb)} disabled={birds.length >= loftCapacity || seeds < sb.cost}>
-                    Adopt
-                  </button>
-                </div>
-              ))}
+              <div className="section-title" style={{ marginTop: 16 }}>
+                {eventsSubtab === "halloween" ? "Autumn Harvest Wheel" : "Exclusive Iggies"}
               </div>
+              {eventsSubtab === "halloween" ? (
+                <HarvestWheel prizes={halloweenWheelPrizes} cost={40} seeds={seeds} onResult={handleWheelResult} />
+              ) : (
+                <div className="item-grid">
+                {config.seasonalBirds.filter((b) => b.season === eventsSubtab).map((sb) => (
+                  <div className="market-item" key={sb.key}>
+                    <PetArt speciesKey={sb.speciesKey} colorKey={sb.colorKey} stage="adult" size={46} />
+                    <div className="info">
+                      <div className="nm">{sb.name}</div>
+                      <div className="sub">{sb.cost} seeds</div>
+                    </div>
+                    <button className="btn btn-primary" onClick={() => handleAdoptSeasonal(sb)} disabled={birds.length >= loftCapacity || seeds < sb.cost}>
+                      Adopt
+                    </button>
+                  </div>
+                ))}
+                </div>
+              )}
                 </>
               )}
             </>
+          )}
+
+          {tab === "explore" && (
+            <Explore
+              birds={birds}
+              bots={BOTS}
+              exploreStage={exploreStage}
+              explorerId={explorerId}
+              onSelectExplorer={setExplorerId}
+              onBattle={handleBattle}
+              potions={potions}
+              books={books}
+              onUseItem={handleUseTrainingItem}
+            />
           )}
 
           {tab === "games" && (
@@ -646,7 +775,7 @@ export default function GameApp({ user, profile, onSignOut }) {
               <div className="market-item">
                 <div style={{ fontSize: 28 }}>🌊</div>
                 <div className="info">
-                  <div className="nm">Capybara Match</div>
+                  <div className="nm">Iggy Match</div>
                   <div className="sub">Memory matching game</div>
                 </div>
                 <button className="btn btn-primary" onClick={() => setActiveGame("match")}>Play</button>
@@ -686,8 +815,8 @@ export default function GameApp({ user, profile, onSignOut }) {
               <div className="market-item">
                 <div style={{ fontSize: 28 }}>🧠</div>
                 <div className="info">
-                  <div className="nm">Capybara Trivia</div>
-                  <div className="sub">8 questions about capybaras</div>
+                  <div className="nm">Iggy Trivia</div>
+                  <div className="sub">8 questions about Italian Greyhounds</div>
                 </div>
                 <button className="btn btn-primary" onClick={() => setActiveGame("trivia")}>Play</button>
               </div>
@@ -705,16 +834,32 @@ export default function GameApp({ user, profile, onSignOut }) {
 
           {tab === "shop" && (
             <>
-              <div className="section-title">Expand the Wallow</div>
+              <div className="section-title">Expand the Kennel</div>
               <div className="decor-item">
                 <div style={{ fontSize: 26 }}>🏗️</div>
                 <div className="info">
-                  <div className="nm">Add wallow space</div>
+                  <div className="nm">Add kennel space</div>
                   <div className="sub">+{CAPACITY_PER_UPGRADE} capacity · {upgradeCost(config, upgradesBought)} seeds</div>
                 </div>
                 <button className="btn btn-primary" onClick={handleUpgradeLoft} disabled={seeds < upgradeCost(config, upgradesBought)}>
                   Build
                 </button>
+              </div>
+
+              <div className="section-title" style={{ marginTop: 16 }}>Training Items</div>
+              <div className="item-grid">
+              {config.trainingItems.map((item) => (
+                <div className="market-item" key={item.key}>
+                  <div style={{ fontSize: 26 }}>{item.emoji}</div>
+                  <div className="info">
+                    <div className="nm">{item.name}</div>
+                    <div className="sub">{item.cost} seeds · +{item.amount} {item.stat} when used</div>
+                  </div>
+                  <button className="btn btn-primary" onClick={() => handleBuyTrainingItem(item)} disabled={seeds < item.cost}>
+                    Buy
+                  </button>
+                </div>
+              ))}
               </div>
 
               <div className="section-title" style={{ marginTop: 16 }}>Decorate (+happiness for everyone)</div>
@@ -764,7 +909,7 @@ export default function GameApp({ user, profile, onSignOut }) {
         {selectedBird && (
           <Modal onClose={() => { setSelectedBirdId(null); setRenameDraft(""); }}>
             <div style={{ textAlign: "center" }}>
-              <CapybaraSVG speciesKey={selectedBird.speciesKey} colorKey={selectedBird.colorKey} stage={selectedBird.stage} size={100} />
+              <PetArt speciesKey={selectedBird.speciesKey} colorKey={selectedBird.colorKey} stage={selectedBird.stage} size={100} />
               <div style={{ fontFamily: "'Fraunces', serif", fontSize: 19, marginTop: 4 }}>
                 {selectedBird.name} <span className={`gender ${selectedBird.gender}`}>{selectedBird.gender === "m" ? "♂" : "♀"}</span>
               </div>
@@ -775,6 +920,10 @@ export default function GameApp({ user, profile, onSignOut }) {
               <div style={{ textAlign: "center", fontWeight: 700, padding: "10px 0" }}>Hatches in {formatDuration(selectedBird.hatchAt - now)}</div>
             ) : (
               <>
+                <div className="stat-row">
+                  <span style={{ width: 78 }}>Life</span>
+                  <StatBar value={getLife(selectedBird)} color="#B96A34" />
+                </div>
                 <div className="stat-row">
                   <span style={{ width: 78 }}>Hunger</span>
                   <StatBar value={computeHunger(selectedBird, now, config)} color="#D9A441" />
@@ -816,7 +965,7 @@ export default function GameApp({ user, profile, onSignOut }) {
             <div className="modal-sheet centered" style={{ textAlign: "center" }}>
               <div style={{ fontSize: 40 }}>🔥</div>
               <div style={{ fontFamily: "'Fraunces', serif", fontSize: 19, margin: "6px 0" }}>Day {dailyReward.streak} streak!</div>
-              <div style={{ fontSize: 14, marginBottom: 14, color: "var(--ink-soft)" }}>Welcome back to the wallow. Here's a little something for stopping by.</div>
+              <div style={{ fontSize: 14, marginBottom: 14, color: "var(--ink-soft)" }}>Welcome back to the kennel. Here's a little something for stopping by.</div>
               <div style={{ fontFamily: "'Fraunces', serif", fontSize: 24, color: "var(--gold)", marginBottom: 14 }}>+{dailyReward.amount} 🌾</div>
               <button className="btn btn-primary" style={{ width: "100%", padding: 12 }} onClick={claimDaily}>Claim</button>
             </div>
@@ -825,42 +974,42 @@ export default function GameApp({ user, profile, onSignOut }) {
 
         {activeGame === "breaker" && (
           <Modal onClose={() => setActiveGame(null)}>
-            <SeedBreakerGame onFinish={(amount, won) => handleGameFinish(amount, won, "breaker")} onClose={() => setActiveGame(null)} />
+            <SeedBreakerGame key={gameRound} onFinish={(amount, won) => handleGameFinish(amount, won, "breaker")} onClose={() => setActiveGame(null)} onPlayAgain={restartActiveGame} />
           </Modal>
         )}
         {activeGame === "match" && (
           <Modal onClose={() => setActiveGame(null)}>
-            <NestMatchGame onFinish={(amount, won) => handleGameFinish(amount, won, "match")} onClose={() => setActiveGame(null)} />
+            <NestMatchGame key={gameRound} onFinish={(amount, won) => handleGameFinish(amount, won, "match")} onClose={() => setActiveGame(null)} onPlayAgain={restartActiveGame} />
           </Modal>
         )}
         {activeGame === "skydash" && (
           <Modal onClose={() => setActiveGame(null)}>
-            <SkyDashGame onFinish={(amount, won) => handleGameFinish(amount, won, "skydash")} onClose={() => setActiveGame(null)} />
+            <SkyDashGame key={gameRound} onFinish={(amount, won) => handleGameFinish(amount, won, "skydash")} onClose={() => setActiveGame(null)} onPlayAgain={restartActiveGame} />
           </Modal>
         )}
         {activeGame === "windrider" && (
           <Modal onClose={() => setActiveGame(null)}>
-            <WindRiderGame onFinish={(amount, won) => handleGameFinish(amount, won, "windrider")} onClose={() => setActiveGame(null)} />
+            <WindRiderGame key={gameRound} onFinish={(amount, won) => handleGameFinish(amount, won, "windrider")} onClose={() => setActiveGame(null)} onPlayAgain={restartActiveGame} />
           </Modal>
         )}
         {activeGame === "stormchase" && (
           <Modal onClose={() => setActiveGame(null)}>
-            <StormChaseGame onFinish={(amount, won) => handleGameFinish(amount, won, "stormchase")} onClose={() => setActiveGame(null)} />
+            <StormChaseGame key={gameRound} onFinish={(amount, won) => handleGameFinish(amount, won, "stormchase")} onClose={() => setActiveGame(null)} onPlayAgain={restartActiveGame} />
           </Modal>
         )}
         {activeGame === "bloombreaker" && (
           <Modal onClose={() => setActiveGame(null)}>
-            <BloomBreakerGame onFinish={(amount, won, score) => handleGameFinish(amount, won, "bloombreaker", score)} onClose={() => setActiveGame(null)} />
+            <BloomBreakerGame key={gameRound} onFinish={(amount, won, score) => handleGameFinish(amount, won, "bloombreaker", score)} onClose={() => setActiveGame(null)} onPlayAgain={restartActiveGame} />
           </Modal>
         )}
         {activeGame === "trivia" && (
           <Modal onClose={() => setActiveGame(null)}>
-            <CapybaraTriviaGame onFinish={(amount, won) => handleGameFinish(amount, won, "trivia")} onClose={() => setActiveGame(null)} />
+            <IggyTriviaGame key={gameRound} onFinish={(amount, won) => handleGameFinish(amount, won, "trivia")} onClose={() => setActiveGame(null)} onPlayAgain={restartActiveGame} />
           </Modal>
         )}
         {activeGame === "nestcatch" && (
           <Modal onClose={() => setActiveGame(null)}>
-            <NestCatchGame onFinish={(amount, won) => handleGameFinish(amount, won, "nestcatch")} onClose={() => setActiveGame(null)} />
+            <NestCatchGame key={gameRound} onFinish={(amount, won) => handleGameFinish(amount, won, "nestcatch")} onClose={() => setActiveGame(null)} onPlayAgain={restartActiveGame} />
           </Modal>
         )}
 

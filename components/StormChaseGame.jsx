@@ -1,8 +1,10 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { clamp } from "@/lib/gameData";
+import { sfx } from "@/lib/sfx";
+import GameResult from "./GameResult";
 
-export default function StormChaseGame({ onFinish, onClose }) {
+export default function StormChaseGame({ onFinish, onClose, onPlayAgain }) {
   const canvasRef = useRef(null);
   const rafRef = useRef(null);
   const [distance, setDistance] = useState(0);
@@ -94,6 +96,7 @@ export default function StormChaseGame({ onFinish, onClose }) {
         if (!b.hit && Math.sqrt(dx * dx + dy * dy) < 16) {
           b.hit = true;
           localStorm = clamp(localStorm + 14, 0, 100);
+          sfx.hit();
         }
       });
       bolts = bolts.filter((b) => b.y < H + 24);
@@ -147,8 +150,12 @@ export default function StormChaseGame({ onFinish, onClose }) {
   useEffect(() => {
     if (status === "caught") {
       onFinish(Math.max(6, distance), distance >= 40);
+      if (distance >= 40) sfx.success();
+      else sfx.fail();
     }
   }, [status]); // eslint-disable-line
+
+  const stars = distance >= 40 ? 3 : distance >= 20 ? 2 : distance >= 5 ? 1 : 0;
 
   return (
     <div style={{ textAlign: "center" }}>
@@ -167,12 +174,13 @@ export default function StormChaseGame({ onFinish, onClose }) {
         </div>
       )}
       {status !== "playing" && (
-        <div style={{ marginTop: 12 }}>
-          <div style={{ fontFamily: "'Fraunces', serif", fontSize: 18, marginBottom: 8 }}>
-            {distance >= 40 ? "Outran the storm! 🎉" : "The storm caught up!"}
-          </div>
-          <button className="btn btn-primary" onClick={onClose}>Close</button>
-        </div>
+        <GameResult
+          stars={stars}
+          title={distance >= 40 ? "Outran the storm! 🎉" : "The storm caught up!"}
+          subtitle={`Distance: ${distance}m`}
+          onPlayAgain={onPlayAgain}
+          onClose={onClose}
+        />
       )}
     </div>
   );

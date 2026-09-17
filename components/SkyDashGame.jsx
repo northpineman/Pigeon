@@ -1,7 +1,9 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { sfx } from "@/lib/sfx";
+import GameResult from "./GameResult";
 
-export default function SkyDashGame({ onFinish, onClose }) {
+export default function SkyDashGame({ onFinish, onClose, onPlayAgain }) {
   const canvasRef = useRef(null);
   const rafRef = useRef(null);
   const [score, setScore] = useState(0);
@@ -22,6 +24,7 @@ export default function SkyDashGame({ onFinish, onClose }) {
     let frame = 0;
     let localScore = 0;
     let done = false;
+    let countdown = 70;
 
     function spawnPipe() {
       const margin = 40;
@@ -31,7 +34,7 @@ export default function SkyDashGame({ onFinish, onClose }) {
 
     function onFlap(e) {
       if (e) e.preventDefault();
-      if (done) return;
+      if (done || countdown > 0) return;
       bird.vy = flap;
     }
     canvas.addEventListener("mousedown", onFlap);
@@ -68,6 +71,26 @@ export default function SkyDashGame({ onFinish, onClose }) {
         drawCloud(c.x, c.y, c.s);
       });
 
+      if (countdown > 0) {
+        countdown--;
+        ctx.save();
+        ctx.translate(bird.x, bird.y);
+        ctx.fillStyle = "#8a6a4a";
+        ctx.beginPath();
+        ctx.ellipse(0, 1, 12, 8, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        ctx.fillStyle = "rgba(75,69,96,0.55)";
+        ctx.fillRect(0, H / 2 - 40, W, 80);
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 40px sans-serif";
+        ctx.textAlign = "center";
+        const label = countdown > 45 ? "3" : countdown > 25 ? "2" : countdown > 5 ? "1" : "Go!";
+        ctx.fillText(label, W / 2, H / 2 + 14);
+        rafRef.current = requestAnimationFrame(loop);
+        return;
+      }
+
       if (frame % 95 === 0) spawnPipe();
       pipeSpeed = 2.6 + Math.min(2.4, localScore * 0.06);
       gapSize = Math.max(92, 128 - localScore * 1.2);
@@ -85,11 +108,12 @@ export default function SkyDashGame({ onFinish, onClose }) {
           p.passed = true;
           localScore += 1;
           setScore(localScore);
+          sfx.pop();
         }
 
         const hitX = bird.x + bird.r > p.x && bird.x - bird.r < p.x + pipeW;
         const hitY = bird.y - bird.r < p.gapY || bird.y + bird.r > p.gapY + gapSize;
-        if (hitX && hitY) done = true;
+        if (hitX && hitY && !done) { done = true; sfx.hit(); }
       });
       pipes = pipes.filter((p) => p.x > -pipeW);
 
@@ -136,8 +160,11 @@ export default function SkyDashGame({ onFinish, onClose }) {
   useEffect(() => {
     if (status === "lost") {
       onFinish(Math.max(6, score * 3), score >= 8);
+      sfx.fail();
     }
   }, [status]); // eslint-disable-line
+
+  const stars = score >= 8 ? 3 : score >= 4 ? 2 : score >= 1 ? 1 : 0;
 
   return (
     <div style={{ textAlign: "center" }}>
@@ -154,12 +181,13 @@ export default function SkyDashGame({ onFinish, onClose }) {
         <div style={{ fontSize: 11, color: "var(--ink-soft)", marginTop: 6 }}>Tap or click to bounce between the vines</div>
       )}
       {status !== "playing" && (
-        <div style={{ marginTop: 12 }}>
-          <div style={{ fontFamily: "'Fraunces', serif", fontSize: 18, marginBottom: 8 }}>
-            {score >= 8 ? "Great bouncing! 🎉" : "Grounded!"}
-          </div>
-          <button className="btn btn-primary" onClick={onClose}>Close</button>
-        </div>
+        <GameResult
+          stars={stars}
+          title={score >= 8 ? "Great bouncing! 🎉" : "Grounded!"}
+          subtitle={`Score: ${score}`}
+          onPlayAgain={onPlayAgain}
+          onClose={onClose}
+        />
       )}
     </div>
   );

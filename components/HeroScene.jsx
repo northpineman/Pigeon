@@ -56,7 +56,7 @@ export default function HeroScene() {
       <ellipse cx="112" cy="146" rx="3.5" ry="8" fill="#7A5233" opacity="0.5" />
       <ellipse cx="868" cy="141" rx="4" ry="9" fill="#7A5233" opacity="0.55" />
 
-      {/* a capybara or two lounging by the water */}
+      {/* an Iggy or two lounging in the grass */}
       <g fill="#8a6a4a" opacity="0.5">
         <ellipse cx="130" cy="160" rx="20" ry="11" />
         <circle cx="112" cy="154" r="8" />

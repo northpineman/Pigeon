@@ -70,8 +70,8 @@ export default function SignupPage() {
   return (
     <div className="page">
       <div className="auth-card">
-        <div style={{ fontSize: 40 }}>🐹</div>
-        <h1>🐹 Join CapyCove</h1>
+        <div style={{ fontSize: 40 }}>🐕</div>
+        <h1>🐕 Join Iggy Meadow</h1>
         <div className="sub">Create your account and start your loft</div>
 
         {error && <div className="auth-error">{error}</div>}

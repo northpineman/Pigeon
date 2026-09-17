@@ -1,9 +1,11 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { sfx } from "@/lib/sfx";
+import GameResult from "./GameResult";
 
-const MATCH_SYMBOLS = ["🐹", "🌾", "🌊", "🌿", "⭐", "🍬", "🌻", "🥕"];
+const MATCH_SYMBOLS = ["🐕", "🦴", "🎾", "🐾", "⭐", "🍬", "🌻", "🧣"];
 
-export default function NestMatchGame({ onFinish, onClose }) {
+export default function NestMatchGame({ onFinish, onClose, onPlayAgain }) {
   const [cards, setCards] = useState(() => {
     const pairs = [...MATCH_SYMBOLS, ...MATCH_SYMBOLS];
     for (let i = pairs.length - 1; i > 0; i--) {
@@ -24,6 +26,7 @@ export default function NestMatchGame({ onFinish, onClose }) {
     const nextFlipped = [...flippedIds, id];
     setCards((prev) => prev.map((c) => (c.id === id ? { ...c, flipped: true } : c)));
     setFlippedIds(nextFlipped);
+    sfx.tick();
     if (nextFlipped.length === 2) {
       lockRef.current = true;
       setMoves((m) => m + 1);
@@ -34,6 +37,8 @@ export default function NestMatchGame({ onFinish, onClose }) {
           const cb = prev.find((c) => c.id === b);
           const isMatch = ca.sym === cb.sym;
           const next = prev.map((c) => (c.id === a || c.id === b ? { ...c, flipped: isMatch, matched: isMatch } : c));
+          if (isMatch) sfx.collect();
+          else sfx.hit();
           if (next.every((c) => c.matched)) setDone(true);
           return next;
         });
@@ -47,8 +52,11 @@ export default function NestMatchGame({ onFinish, onClose }) {
     if (done) {
       const seeds = Math.max(8, 40 - moves * 2);
       onFinish(seeds, true);
+      sfx.success();
     }
   }, [done]); // eslint-disable-line
+
+  const stars = moves <= 10 ? 3 : moves <= 16 ? 2 : 1;
 
   return (
     <div style={{ textAlign: "center" }}>
@@ -68,6 +76,8 @@ export default function NestMatchGame({ onFinish, onClose }) {
               cursor: "pointer",
               background: c.flipped || c.matched ? "#FFF3DC" : "#8C6FE0",
               border: c.matched ? "2px solid #4CAF7D" : "2px solid transparent",
+              transform: c.matched ? "scale(1.05)" : "scale(1)",
+              transition: "transform 0.2s ease, background 0.2s ease",
             }}
           >
             {c.flipped || c.matched ? c.sym : ""}
@@ -75,10 +85,7 @@ export default function NestMatchGame({ onFinish, onClose }) {
         ))}
       </div>
       {done && (
-        <div style={{ marginTop: 14 }}>
-          <div style={{ fontFamily: "'Fraunces', serif", fontSize: 18, marginBottom: 8 }}>All paired! 🎉</div>
-          <button className="btn btn-primary" onClick={onClose}>Close</button>
-        </div>
+        <GameResult stars={stars} title="All paired! 🎉" subtitle={`${moves} moves`} onPlayAgain={onPlayAgain} onClose={onClose} />
       )}
     </div>
   );
