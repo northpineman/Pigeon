@@ -6,7 +6,7 @@ import { getLife, getMaxLife, getStrength, getWisdom } from "@/lib/gameData";
 
 const FLAVOR = [
   "The path winds quietly ahead.",
-  "Birds chirp somewhere in the branches.",
+  "Iggies scamper somewhere in the meadow.",
   "A gentle breeze rustles the tall grass.",
   "The trail forks, but you press onward.",
   "Sunlight filters through the leaves overhead.",
@@ -75,7 +75,7 @@ export default function Explore({ birds, bots, exploreStage, explorerId, onSelec
           {birds.filter((b) => b.stage !== "egg").map((b) => (
             <div
               key={b.id}
-              className={`bird-card ${b.id === explorerId ? "busy" : ""}`}
+              className={`pet-card ${b.id === explorerId ? "busy" : ""}`}
               onClick={() => {
                 onSelectExplorer(b.id);
                 setShowPicker(false);

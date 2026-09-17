@@ -31,7 +31,7 @@ export default function Leaderboard({ myUsername }) {
       </div>
       {error && <div style={{ fontSize: 12, color: "#B23A3A", textAlign: "center" }}>Couldn't load leaderboard: {error}</div>}
       {!error && !rows && <div style={{ textAlign: "center", fontSize: 13 }}>Loading…</div>}
-      {rows && rows.length === 0 && <div style={{ textAlign: "center", fontSize: 13, color: "var(--ink-soft)" }}>No lofts yet — be the first!</div>}
+      {rows && rows.length === 0 && <div style={{ textAlign: "center", fontSize: 13, color: "var(--ink-soft)" }}>No kennels yet — be the first!</div>}
       {rows &&
         rows.map((r, i) => (
           <a

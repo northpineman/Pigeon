@@ -600,3 +600,225 @@ input[type="email"] {
   .site-nav { padding: 8px 8px; justify-content: flex-start; }
   .content { margin: 14px 10px 40px; padding: 18px 16px 26px; }
 }
+
+/* ---------------------------- layered world navigation ---------------------------- */
+.world-links {
+  width: 100%;
+  max-width: 980px;
+  margin: 12px auto 0;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  background: rgba(255, 253, 248, 0.88);
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 3px 0 rgba(91, 70, 54, 0.08);
+}
+
+.world-links button {
+  appearance: none;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink-soft);
+  border-radius: 999px;
+  padding: 7px 11px;
+  font: 700 12px "Rubik", sans-serif;
+  cursor: pointer;
+  transition: transform .12s ease, background .12s ease, color .12s ease;
+}
+
+.world-links button:hover {
+  transform: translateY(-1px);
+  background: var(--lavender);
+  color: var(--ink);
+}
+
+.world-links button.active {
+  background: var(--sage);
+  border-color: var(--sage-deep);
+  color: var(--ink);
+  box-shadow: 0 2px 0 rgba(91, 70, 54, 0.12);
+}
+
+@media (max-width: 700px) {
+  .world-links {
+    justify-content: flex-start;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+}
+
+/* ---------------------------- kennel foundation ---------------------------- */
+.kennel-toolbar {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.kennel-count { font-size: 12px; color: var(--ink-soft); }
+.kennel-tools { display: flex; gap: 8px; align-items: center; }
+.kennel-tools input, .kennel-tools select {
+  min-height: 38px;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--ink);
+  padding: 8px 10px;
+  font: inherit;
+}
+.kennel-tools input { width: 210px; }
+.pet-card {
+  appearance: none;
+  border: 1.5px solid var(--line);
+  width: 100%;
+  cursor: pointer;
+  color: var(--ink);
+  background: var(--card);
+  border-radius: 14px;
+  padding: 14px 10px 12px;
+  text-align: center;
+  box-shadow: 0 2px 0 rgba(91,70,54,.12);
+  transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease;
+}
+.pet-card:hover { transform: translateY(-2px); box-shadow: 0 5px 0 rgba(91,70,54,.12); border-color: var(--sage-deep); }
+.pet-card-tag { display: inline-block; margin-top: 7px; padding: 3px 7px; border-radius: 999px; background: var(--rose); font-size: 10px; font-weight: 800; }
+.kennel-empty { padding: 42px 18px; text-align: center; border: 2px dashed var(--line); border-radius: 18px; background: rgba(255,253,248,.7); }
+.kennel-empty-art { font-size: 54px; margin-bottom: 6px; }
+.kennel-empty h3 { margin: 4px 0; }
+.kennel-empty p { color: var(--ink-soft); font-size: 13px; margin: 6px auto 16px; max-width: 420px; }
+@media (max-width: 680px) {
+  .kennel-toolbar { align-items: stretch; flex-direction: column; }
+  .kennel-tools { width: 100%; }
+  .kennel-tools input { flex: 1; width: auto; }
+}
+
+/* ------------------------- Iggy profile ------------------------- */
+.iggy-profile-head { display:flex; align-items:center; gap:18px; padding-bottom:14px; }
+.iggy-profile-art { width:170px; min-width:170px; height:170px; display:grid; place-items:center; background:var(--lavender); border:2px solid var(--line); border-radius:18px; }
+.iggy-profile-heading { min-width:0; }
+.iggy-profile-heading h2 { margin:3px 0 7px; font-size:28px; }
+.iggy-profile-kicker, .profile-kicker { font-size:10px; letter-spacing:.12em; font-weight:800; color:var(--ink-soft); }
+.iggy-profile-sub { display:flex; flex-wrap:wrap; gap:7px; color:var(--ink-soft); font-size:12px; }
+.iggy-profile-sub span { background:var(--card); border:1px solid var(--line); border-radius:999px; padding:4px 8px; }
+.profile-tabs { display:flex; gap:4px; overflow-x:auto; border-top:2px dashed var(--line); border-bottom:2px dashed var(--line); padding:8px 0; margin-bottom:14px; }
+.profile-tabs button { border:0; background:transparent; color:var(--ink-soft); font:700 12px "Rubik"; padding:7px 10px; border-radius:9px; white-space:nowrap; cursor:pointer; }
+.profile-tabs button.active { background:var(--sage); color:var(--ink); box-shadow:0 2px 0 var(--sage-deep); }
+.profile-panel { min-height:210px; }
+.profile-facts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.profile-facts > div { background:var(--card); border:1.5px solid var(--line); border-radius:10px; padding:9px 10px; display:flex; flex-direction:column; gap:3px; }
+.profile-facts span, .genetics-card span { font-size:10px; color:var(--ink-soft); font-weight:700; text-transform:uppercase; letter-spacing:.05em; }
+.profile-facts strong { font-size:12px; overflow-wrap:anywhere; }
+.profile-note { margin-top:12px; padding:10px 12px; background:var(--lavender); border:1px dashed var(--line); border-radius:10px; color:var(--ink-soft); font-size:11.5px; line-height:1.45; }
+.appearance-preview { min-height:205px; display:grid; place-items:center; background:var(--lavender); border-radius:14px; margin-bottom:12px; }
+.profile-actions { display:flex; gap:8px; margin-top:13px; }
+.profile-actions .btn { flex:1; }
+.profile-empty { min-height:190px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px; text-align:center; color:var(--ink-soft); }
+.profile-empty strong { color:var(--ink); }
+.profile-empty-icon { font-size:48px; }
+.genetics-card { display:grid; grid-template-columns:90px 1fr; column-gap:10px; row-gap:2px; padding:10px 11px; margin-bottom:7px; background:var(--card); border:1.5px solid var(--line); border-radius:10px; }
+.genetics-card span { grid-row:1 / span 2; align-self:center; }
+.genetics-card strong { font-size:12px; }
+.genetics-card small, .wardrobe-item small, .history-list small { color:var(--ink-soft); font-size:10.5px; }
+.wardrobe-current { display:flex; align-items:center; gap:13px; padding:10px; background:var(--lavender); border-radius:13px; }
+.wardrobe-current-art { width:115px; height:115px; display:grid; place-items:center; }
+.wardrobe-current h3 { margin:3px 0 4px; font-size:18px; }
+.wardrobe-current p { margin:0; font-size:11px; color:var(--ink-soft); line-height:1.4; }
+.wardrobe-list { margin-top:10px; display:grid; gap:6px; }
+.wardrobe-item { display:flex; align-items:center; gap:9px; padding:8px 10px; border:1.5px solid var(--line); border-radius:10px; background:var(--card); }
+.wardrobe-item > span { font-size:18px; }
+.wardrobe-item div { flex:1; display:flex; flex-direction:column; gap:2px; }
+.wardrobe-item strong { font-size:11.5px; }
+.wardrobe-item b { font-size:9px; color:var(--sage-deep); }
+.wardrobe-item.equipped { border-color:var(--sage-deep); }
+.history-list { display:grid; gap:4px; }
+.history-list > div { display:flex; gap:10px; align-items:flex-start; padding:10px 4px; border-bottom:1px solid var(--line); }
+.history-dot { width:30px; height:30px; display:grid; place-items:center; background:var(--lavender); border-radius:50%; }
+.history-list > div > div { display:flex; flex-direction:column; gap:2px; }
+.history-list strong { font-size:12px; }
+
+.wardrobe-slots { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:6px; margin-top:10px; }
+.wardrobe-slot { min-width:0; padding:8px 6px; border:1.5px dashed var(--line); border-radius:10px; background:var(--card); text-align:center; }
+.wardrobe-slot.active { border-style:solid; border-color:var(--sage-deep); background:var(--sage); }
+.wardrobe-slot > span { display:block; font-size:17px; margin-bottom:3px; }
+.wardrobe-slot div { display:flex; flex-direction:column; gap:2px; min-width:0; }
+.wardrobe-slot strong { font-size:9px; }
+.wardrobe-slot small { color:var(--ink-soft); font-size:8.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.wardrobe-section-title { margin:13px 0 6px; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-soft); }
+.wardrobe-item.locked { opacity:.78; }
+.wardrobe-equip { border:1px solid var(--line); background:var(--lavender); color:var(--ink); border-radius:8px; padding:5px 8px; font:800 9px "Rubik"; cursor:pointer; white-space:nowrap; }
+.wardrobe-equip:hover { transform:translateY(-1px); }
+@media (max-width:640px) { .wardrobe-slots { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+
+.profile-rename { margin-top:14px; padding-top:12px; border-top:2px dashed var(--line); }
+.profile-rename label { display:block; font-size:11px; font-weight:800; margin-bottom:6px; }
+.profile-rename > div { display:flex; gap:8px; }
+.profile-rename input { flex:1; min-width:0; }
+@media (max-width:620px) {
+  .iggy-profile-head { align-items:flex-start; }
+  .iggy-profile-art { width:125px; min-width:125px; height:125px; }
+  .iggy-profile-art img { max-width:115px; max-height:115px; }
+  .iggy-profile-heading h2 { font-size:23px; }
+  .profile-facts { grid-template-columns:1fr; }
+  .genetics-card { grid-template-columns:78px 1fr; }
+}
+
+/* ------------------------- Meadow Closet v7 ------------------------- */
+.shop-subnav { display:flex; gap:6px; margin-bottom:14px; padding-bottom:9px; border-bottom:2px dashed var(--line); }
+.shop-subnav button { border:1px solid var(--line); background:var(--card); color:var(--ink-soft); border-radius:999px; padding:7px 11px; font:800 11px "Rubik"; cursor:pointer; }
+.shop-subnav button.active { background:var(--sage); color:var(--ink); border-color:var(--sage-deep); }
+.wardrobe-page { min-width:0; }
+.wardrobe-hero { display:flex; justify-content:space-between; gap:16px; align-items:center; padding:16px; background:linear-gradient(135deg,var(--lavender),var(--card)); border:1.5px solid var(--line); border-radius:16px; }
+.wardrobe-hero h2 { margin:2px 0 4px; font-size:25px; }
+.wardrobe-hero p { margin:0; max-width:520px; color:var(--ink-soft); font-size:12px; line-height:1.45; }
+.wardrobe-progress { min-width:95px; text-align:center; padding:9px; background:var(--card); border:1px solid var(--line); border-radius:12px; }
+.wardrobe-progress strong { display:block; font:800 20px "Fraunces",serif; }
+.wardrobe-progress span { font-size:9px; color:var(--ink-soft); }
+.wardrobe-dresser { display:grid; grid-template-columns:210px 1fr; gap:14px; margin-top:12px; padding:12px; background:var(--card); border:1.5px solid var(--line); border-radius:16px; }
+.dresser-preview { min-height:190px; display:grid; place-items:center; background:var(--lavender); border-radius:12px; }
+.dresser-info { padding:8px 4px; }
+.dresser-info h3 { margin:2px 0 4px; font-size:20px; }
+.dresser-info p { margin:0 0 10px; color:var(--ink-soft); font-size:11px; }
+.dresser-iggies { display:flex; flex-wrap:wrap; gap:7px; }
+.dresser-iggies button { display:flex; align-items:center; gap:5px; border:1px solid var(--line); background:var(--lavender); color:var(--ink); border-radius:10px; padding:4px 7px; cursor:pointer; }
+.dresser-iggies button.active { border-color:var(--sage-deep); background:var(--sage); }
+.dresser-iggies span { font-size:9px; font-weight:800; }
+.wardrobe-filterbar { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:15px 0 8px; }
+.wardrobe-filters { display:flex; gap:4px; flex-wrap:wrap; }
+.wardrobe-filters button { border:1px solid var(--line); background:var(--card); color:var(--ink-soft); border-radius:999px; padding:5px 8px; font:700 9px "Rubik"; cursor:pointer; }
+.wardrobe-filters button.active { background:var(--sage); color:var(--ink); border-color:var(--sage-deep); }
+.wardrobe-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+.wardrobe-card { display:grid; grid-template-columns:100px 1fr; gap:8px; padding:9px; border:1.5px solid var(--line); border-radius:13px; background:var(--card); }
+.wardrobe-card.equipped { border-color:var(--sage-deep); box-shadow:0 0 0 2px rgba(127,166,120,.15); }
+.wardrobe-card.locked { opacity:.86; }
+.wardrobe-card-art { min-height:115px; display:grid; place-items:center; background:var(--lavender); border-radius:10px; }
+.wardrobe-card-body { min-width:0; display:flex; flex-direction:column; }
+.wardrobe-card-title { display:flex; align-items:center; justify-content:space-between; gap:4px; }
+.wardrobe-card-title h3 { margin:0; font-size:12px; }
+.wardrobe-card-title span { font-size:15px; }
+.wardrobe-meta { display:flex; gap:4px; margin:4px 0; }
+.wardrobe-meta span { padding:2px 5px; border-radius:999px; background:var(--lavender); font-size:8px; font-weight:800; text-transform:capitalize; }
+.wardrobe-card-body p { margin:0 0 7px; color:var(--ink-soft); font-size:9.5px; line-height:1.35; flex:1; }
+.wardrobe-action { border:1px solid var(--line); background:var(--sage); color:var(--ink); border-radius:8px; padding:6px 8px; font:800 9px "Rubik"; cursor:pointer; }
+.wardrobe-action.equipped { background:var(--lavender); color:var(--sage-deep); cursor:default; }
+.wardrobe-action:disabled { opacity:.7; cursor:not-allowed; }
+.wardrobe-slot-row { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:6px; margin-top:10px; }
+@media (max-width:700px) { .wardrobe-grid { grid-template-columns:1fr; } .wardrobe-dresser { grid-template-columns:1fr; } .dresser-preview { min-height:160px; } }
+@media (max-width:520px) { .wardrobe-hero { align-items:flex-start; } .wardrobe-progress { min-width:75px; } .wardrobe-slot-row { grid-template-columns:repeat(3,1fr); } .wardrobe-filterbar { align-items:flex-start; flex-direction:column; } }
+
+/* ------------------------- Layered Closet v8 ------------------------- */
+.wardrobe-progress small { display:block; margin-top:3px; color:var(--sage-deep); font-size:8px; font-weight:800; }
+.dresser-slots { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:5px; margin:8px 0 10px; }
+.dresser-slot { min-width:0; padding:6px 4px; border:1px dashed var(--line); border-radius:9px; background:var(--card); text-align:center; }
+.dresser-slot.filled { border-style:solid; border-color:var(--sage-deep); background:var(--sage); }
+.dresser-slot > span { display:block; font-size:15px; }
+.dresser-slot div { display:flex; flex-direction:column; gap:2px; min-width:0; }
+.dresser-slot strong { font-size:8px; }
+.dresser-slot small { color:var(--ink-soft); font-size:7.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.wardrobe-meta { flex-wrap:wrap; }
+@media (max-width:700px) { .dresser-slots { grid-template-columns:repeat(3,minmax(0,1fr)); } }

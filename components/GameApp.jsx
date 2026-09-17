@@ -22,6 +22,9 @@ import WorldMap from "./WorldMap";
 import HarvestWheel from "./HarvestWheel";
 import Explore from "./Explore";
 import { sfx } from "@/lib/sfx";
+import { OUTFITS, getOutfit, normalizeWardrobeSlots } from "@/lib/looks";
+import Wardrobe from "./Wardrobe";
+import { createGenetics, normalizeGenetics, geneticRarity, traitLabel, traitEmoji } from "@/lib/genetics";
 
 export default function GameApp({ user, profile, onSignOut }) {
   const [loaded, setLoaded] = useState(false);
@@ -29,7 +32,7 @@ export default function GameApp({ user, profile, onSignOut }) {
   const [now, setNow] = useState(Date.now());
 
   const [seeds, setSeeds] = useState(30);
-  const [birds, setBirds] = useState([]);
+  const [pets, setPets] = useState([]);
   const [loftCapacity, setLoftCapacity] = useState(LOFT_BASE_CAPACITY);
   const [upgradesBought, setUpgradesBought] = useState(0);
   const [decorations, setDecorations] = useState([]);
@@ -41,7 +44,9 @@ export default function GameApp({ user, profile, onSignOut }) {
   const [achievementCatalog, setAchievementCatalog] = useState([]);
   const [unlockedKeys, setUnlockedKeys] = useState([]);
 
-  const [tab, setTab] = useState("loft");
+  const [tab, setTab] = useState("kennel");
+  const [kennelSearch, setKennelSearch] = useState("");
+  const [kennelSort, setKennelSort] = useState("name");
   const [nestsSubtab, setNestsSubtab] = useState("adopt");
   const [eventsSubtab, setEventsSubtab] = useState("map");
   const [selectedBirdId, setSelectedBirdId] = useState(null);
@@ -49,6 +54,8 @@ export default function GameApp({ user, profile, onSignOut }) {
   const [dailyReward, setDailyReward] = useState(null);
   const [toast, setToast] = useState(null);
   const [renameDraft, setRenameDraft] = useState("");
+  const [profileTab, setProfileTab] = useState("about");
+  const [shopSubtab, setShopSubtab] = useState("shop");
   const [activeGame, setActiveGame] = useState(null);
   const [gameRound, setGameRound] = useState(0);
   const restartActiveGame = () => setGameRound((r) => r + 1);
@@ -111,14 +118,16 @@ export default function GameApp({ user, profile, onSignOut }) {
       }
       if (save) {
         setSeeds(save.seeds ?? 30);
-        setBirds(save.birds && save.birds.length ? save.birds : defaultBirds());
+        setPets(save.birds && save.birds.length ? save.birds : defaultBirds());
         setLoftCapacity(save.loft_capacity ?? LOFT_BASE_CAPACITY);
         setUpgradesBought(save.upgrades_bought ?? 0);
         setDecorations(save.decorations ?? []);
         setLastCollectAt(save.last_collect_at ?? Date.now());
         setLastLoginDate(save.last_login_date ?? null);
         setStreak(save.streak ?? 0);
-        setFlags(save.flags ?? {});
+        const loadedFlags = save.flags ?? {};
+        const ownedOutfits = Array.from(new Set(["none", "ribbon", ...(loadedFlags.wardrobeInventory || []), ...(save.birds || []).map((b) => b.outfitKey).filter(Boolean)]));
+        setFlags({ ...loadedFlags, wardrobeInventory: ownedOutfits });
       }
       setLoaded(true);
     })();
@@ -149,7 +158,7 @@ export default function GameApp({ user, profile, onSignOut }) {
     const id = setInterval(() => {
       const t = Date.now();
       setNow(t);
-      setBirds((prev) => {
+      setPets((prev) => {
         let changed = false;
         const next = prev.map((b) => {
           if (b.stage === "egg" && b.hatchAt && t >= b.hatchAt) {
@@ -159,6 +168,10 @@ export default function GameApp({ user, profile, onSignOut }) {
           if (b.stage === "baby" && b.growAt && t >= b.growAt) {
             changed = true;
             return { ...b, stage: "adult" };
+          }
+          if (b.breedingUntil && t >= b.breedingUntil) {
+            changed = true;
+            return { ...b, breedingUntil: null };
           }
           return b;
         });
@@ -177,7 +190,7 @@ export default function GameApp({ user, profile, onSignOut }) {
         .from("player_saves")
         .update({
           seeds,
-          birds,
+          birds: pets,
           loft_capacity: loftCapacity,
           upgrades_bought: upgradesBought,
           decorations,
@@ -195,12 +208,12 @@ export default function GameApp({ user, profile, onSignOut }) {
     return () => {
       if (saveTimer.current) clearTimeout(saveTimer.current);
     };
-  }, [seeds, birds, loftCapacity, upgradesBought, decorations, lastCollectAt, lastLoginDate, streak, flags, loaded, user.id]);
+  }, [seeds, pets, loftCapacity, upgradesBought, decorations, lastCollectAt, lastLoginDate, streak, flags, loaded, user.id]);
 
   /* ---- achievement checking ---- */
   useEffect(() => {
     if (!loaded || achievementCatalog.length === 0) return;
-    const currentKeys = computeUnlockedKeys({ birds, decorations, seeds, streak, upgradesBought, flags });
+    const currentKeys = computeUnlockedKeys({ birds: pets, decorations, seeds, streak, upgradesBought, flags });
     const newKeys = currentKeys.filter((k) => !unlockedKeys.includes(k));
     if (newKeys.length === 0) return;
     (async () => {
@@ -218,7 +231,7 @@ export default function GameApp({ user, profile, onSignOut }) {
         if (bonus > 0) setSeeds((s) => s + bonus);
       }
     })();
-  }, [birds, decorations, seeds, streak, upgradesBought, flags, loaded, achievementCatalog]); // eslint-disable-line
+  }, [pets, decorations, seeds, streak, upgradesBought, flags, loaded, achievementCatalog]); // eslint-disable-line
 
   /* ---- handle return from Stripe checkout ---- */
   useEffect(() => {
@@ -241,8 +254,15 @@ export default function GameApp({ user, profile, onSignOut }) {
     }
   }, []); // eslint-disable-line
 
-  const usedNames = birds.map((b) => b.name).filter(Boolean);
-  const pending = pendingIncome(birds, lastCollectAt, now, config, decorBonus);
+  const usedNames = pets.map((b) => b.name).filter(Boolean);
+  const kennelPets = [...pets]
+    .filter((p) => !kennelSearch.trim() || (p.name || "").toLowerCase().includes(kennelSearch.trim().toLowerCase()) || (SPECIES[p.speciesKey]?.name || "").toLowerCase().includes(kennelSearch.trim().toLowerCase()))
+    .sort((a, b) => {
+      if (kennelSort === "stage") return ({ egg: 0, baby: 1, adult: 2 }[a.stage] ?? 9) - ({ egg: 0, baby: 1, adult: 2 }[b.stage] ?? 9);
+      if (kennelSort === "happiness") return computeHappiness(b, now, config, decorBonus) - computeHappiness(a, now, config, decorBonus);
+      return (a.name || "").localeCompare(b.name || "");
+    });
+  const pending = pendingIncome(pets, lastCollectAt, now, config, decorBonus);
 
   /* ---- actions ---- */
   const handleCollect = () => {
@@ -254,50 +274,50 @@ export default function GameApp({ user, profile, onSignOut }) {
 
   const handleFeed = (id) => {
     if (seeds < config.feedCost) return notify("You're a bit short on seeds for feed");
-    setBirds((prev) => prev.map((b) => (b.id === id ? { ...b, lastFedAt: Date.now(), life: Math.min(getMaxLife(b), getLife(b) + 30) } : b)));
+    setPets((prev) => prev.map((b) => (b.id === id ? { ...b, lastFedAt: Date.now(), life: Math.min(getMaxLife(b), getLife(b) + 30) } : b)));
     setSeeds((s) => s - config.feedCost);
   };
 
   const handleClean = (id) => {
-    setBirds((prev) => prev.map((b) => (b.id === id ? { ...b, lastCleanedAt: Date.now() } : b)));
+    setPets((prev) => prev.map((b) => (b.id === id ? { ...b, lastCleanedAt: Date.now() } : b)));
   };
 
   const handleAdopt = (speciesKey) => {
-    const cost = adoptCost(config, speciesKey, birds.length);
-    if (birds.length >= loftCapacity) return notify("Your kennel is full — upgrade for more room");
+    const cost = adoptCost(config, speciesKey, pets.length);
+    if (pets.length >= loftCapacity) return notify("Your kennel is full — upgrade for more room");
     if (seeds < cost) return notify("You're a bit short on seeds");
     const colorKey = pickRandom(SPECIES[speciesKey].colors);
     const t = Date.now();
     const bird = makeBird({ speciesKey, colorKey, stage: "baby", now: t, growAt: t + config.adoptGrowHours * HOUR });
     bird.name = pickRandomName(usedNames);
-    setBirds((prev) => [...prev, bird]);
+    setPets((prev) => [...prev, bird]);
     setSeeds((s) => s - cost);
     notify(`${bird.name} has joined the kennel! 🐕`);
   };
 
   const handleAdoptSeasonal = (sb) => {
-    if (birds.length >= loftCapacity) return notify("Your kennel is full — upgrade for more room");
+    if (pets.length >= loftCapacity) return notify("Your kennel is full — upgrade for more room");
     if (seeds < sb.cost) return notify("You're a bit short on seeds");
     const t = Date.now();
     const bird = makeBird({ speciesKey: sb.speciesKey, colorKey: sb.colorKey, stage: "baby", now: t, growAt: t + config.adoptGrowHours * HOUR });
     bird.name = pickRandomName(usedNames);
-    setBirds((prev) => [...prev, bird]);
+    setPets((prev) => [...prev, bird]);
     setSeeds((s) => s - sb.cost);
     setFlags((prev) => ({ ...prev, seasonalAdopted: true }));
     notify(`${bird.name} has joined the kennel! 🐕`);
   };
 
-  const halloweenSeasonalBirds = config.seasonalBirds.filter((b) => b.season === "halloween");
-  const findSeasonal = (key) => halloweenSeasonalBirds.find((b) => b.key === key);
+  const halloweenSeasonalIggies = config.seasonalIggies.filter((b) => b.season === "halloween");
+  const findSeasonalIggy = (key) => halloweenSeasonalIggies.find((b) => b.key === key);
   const halloweenWheelPrizes = [
     { key: "seeds10", label: "10 seeds", emoji: "🌾", weight: 25, rarity: "common", kind: "seeds", amount: 10 },
     { key: "seeds25", label: "25 seeds", emoji: "🌾", weight: 20, rarity: "common", kind: "seeds", amount: 25 },
     { key: "decor", label: "Random Halloween decoration", emoji: "🎃", weight: 15, rarity: "uncommon", kind: "decor" },
-    { key: "raven", label: "Raven Iggy", emoji: "🐦", weight: 12, rarity: "uncommon", kind: "bird", sb: findSeasonal("sb-raven") },
-    { key: "jack", label: "Jack-o'-Iggy", emoji: "🎃", weight: 12, rarity: "uncommon", kind: "bird", sb: findSeasonal("sb-jack") },
-    { key: "candycorn", label: "Candy Corn Iggy", emoji: "🍬", weight: 12, rarity: "uncommon", kind: "bird", sb: findSeasonal("sb-candycorn") },
-    { key: "ghost", label: "Ghost Iggy", emoji: "👻", weight: 4, rarity: "rare", kind: "bird", sb: findSeasonal("sb-ghost") },
-  ].filter((p) => p.kind !== "bird" || p.sb);
+    { key: "raven", label: "Raven Iggy", emoji: "🐦", weight: 12, rarity: "uncommon", kind: "iggy", sb: findSeasonalIggy("sb-raven") },
+    { key: "jack", label: "Jack-o'-Iggy", emoji: "🎃", weight: 12, rarity: "uncommon", kind: "iggy", sb: findSeasonalIggy("sb-jack") },
+    { key: "candycorn", label: "Candy Corn Iggy", emoji: "🍬", weight: 12, rarity: "uncommon", kind: "iggy", sb: findSeasonalIggy("sb-candycorn") },
+    { key: "ghost", label: "Ghost Iggy", emoji: "👻", weight: 4, rarity: "rare", kind: "iggy", sb: findSeasonalIggy("sb-ghost") },
+  ].filter((p) => p.kind !== "iggy" || p.sb);
 
   const handleWheelResult = (prize, cost) => {
     setSeeds((s) => s - cost);
@@ -321,8 +341,8 @@ export default function GameApp({ user, profile, onSignOut }) {
       return;
     }
 
-    if (prize.kind === "bird") {
-      if (birds.length >= loftCapacity) {
+    if (prize.kind === "iggy") {
+      if (pets.length >= loftCapacity) {
         setSeeds((s) => s + 50);
         notify("Your kennel is full — +50 seeds instead!");
         return;
@@ -330,7 +350,7 @@ export default function GameApp({ user, profile, onSignOut }) {
       const t = Date.now();
       const bird = makeBird({ speciesKey: prize.sb.speciesKey, colorKey: prize.sb.colorKey, stage: "baby", now: t, growAt: t + config.adoptGrowHours * HOUR });
       bird.name = pickRandomName(usedNames);
-      setBirds((prev) => [...prev, bird]);
+      setPets((prev) => [...prev, bird]);
       setFlags((prev) => ({ ...prev, seasonalAdopted: true }));
       notify(`${bird.name} the ${prize.sb.name} has joined the kennel! 🐕`);
     }
@@ -353,13 +373,13 @@ export default function GameApp({ user, profile, onSignOut }) {
     const key = stat === "strength" ? "potions" : "books";
     if ((flags[key] || 0) <= 0) return;
     setFlags((prev) => ({ ...prev, [key]: prev[key] - 1 }));
-    setBirds((prev) => prev.map((b) => (b.id === petId ? { ...b, [stat]: (stat === "strength" ? getStrength(b) : getWisdom(b)) + 2 } : b)));
+    setPets((prev) => prev.map((b) => (b.id === petId ? { ...b, [stat]: (stat === "strength" ? getStrength(b) : getWisdom(b)) + 2 } : b)));
     notify(stat === "strength" ? "+2 Strength! 💪" : "+2 Wisdom! 📖");
   };
 
   const handleBattle = (petId) => {
     const bot = BOTS[Math.min(exploreStage, BOTS.length - 1)];
-    const pet = birds.find((b) => b.id === petId);
+    const pet = pets.find((b) => b.id === petId);
     if (!pet || getLife(pet) <= 0) return { won: false, message: "Too weak to battle right now." };
 
     const petPower = getStrength(pet) * 2 + getWisdom(pet) + Math.random() * 10;
@@ -371,7 +391,7 @@ export default function GameApp({ user, profile, onSignOut }) {
       : Math.max(8, Math.round(15 + Math.random() * 15 - getWisdom(pet) / 3));
 
     const newLife = Math.max(0, getLife(pet) - damage);
-    setBirds((prev) => prev.map((b) => (b.id === petId ? { ...b, life: newLife } : b)));
+    setPets((prev) => prev.map((b) => (b.id === petId ? { ...b, life: newLife } : b)));
 
     if (won) {
       setSeeds((s) => s + bot.seedReward);
@@ -401,29 +421,31 @@ export default function GameApp({ user, profile, onSignOut }) {
 
   const canBreed = (() => {
     if (breedSelection.length !== 2) return false;
-    const [a, b] = breedSelection.map((id) => birds.find((x) => x.id === id));
+    const [a, b] = breedSelection.map((id) => pets.find((x) => x.id === id));
     if (!a || !b) return false;
-    return a.gender !== b.gender;
+    return a.stage === "adult" && b.stage === "adult" && a.gender !== b.gender && !(a.breedingUntil && a.breedingUntil > Date.now()) && !(b.breedingUntil && b.breedingUntil > Date.now());
   })();
 
   const handleBreed = () => {
     if (!canBreed) return;
-    if (birds.length >= loftCapacity) return notify("Your kennel is full — upgrade for more room");
+    if (pets.length >= loftCapacity) return notify("Your kennel is full — upgrade for more room");
     if (seeds < config.breedCost) return notify("You're a bit short on seeds");
     const t = Date.now();
     const [idA, idB] = breedSelection;
-    const parentA = birds.find((b) => b.id === idA);
-    const parentB = birds.find((b) => b.id === idB);
+    const parentA = pets.find((b) => b.id === idA);
+    const parentB = pets.find((b) => b.id === idB);
     const speciesKey = Math.random() < 0.5 ? parentA.speciesKey : parentB.speciesKey;
     let colorKey = Math.random() < 0.5 ? parentA.colorKey : parentB.colorKey;
     if (Math.random() < 0.08) colorKey = "iridescent";
     const egg = makeBird({ speciesKey, colorKey, stage: "egg", now: t, hatchAt: t + config.eggHatchHours * HOUR });
     egg.name = pickRandomName(usedNames);
-    setBirds((prev) => prev.map((b) => (b.id === idA || b.id === idB ? { ...b, breedingUntil: t + config.eggHatchHours * HOUR } : b)).concat(egg));
+    egg.genetics = createGenetics({ parentA, parentB, speciesKey, colorKey });
+    egg.lineage = { motherId: parentA.gender === "f" ? parentA.id : parentB.id, fatherId: parentA.gender === "m" ? parentA.id : parentB.id, bredAt: t };
+    setPets((prev) => prev.map((b) => (b.id === idA || b.id === idB ? { ...b, breedingUntil: t + config.eggHatchHours * HOUR } : b)).concat(egg));
     setSeeds((s) => s - config.breedCost);
     setBreedSelection([]);
     setFlags((prev) => ({ ...prev, bred: true }));
-    notify("A pup is on the way! 🐹");
+    notify("A pup is on the way! 🐕");
   };
 
   const handleUpgradeLoft = () => {
@@ -443,10 +465,38 @@ export default function GameApp({ user, profile, onSignOut }) {
     notify("Placed in your kennel");
   };
 
+  const handleEquipOutfit = (petId, outfitKey, explicitSlot = null) => {
+    const outfit = getOutfit(outfitKey);
+    if (outfitKey !== "none" && outfit.key !== outfitKey) return;
+    const owned = flags.wardrobeInventory || ["none", "ribbon"];
+    if (outfitKey !== "none" && !owned.includes(outfitKey)) return notify("That wardrobe piece isn't in your closet yet");
+    setPets((prev) => prev.map((b) => {
+      if (b.id !== petId) return b;
+      const slot = explicitSlot || outfit.slot;
+      const wardrobeSlots = { ...normalizeWardrobeSlots(b) };
+      if (outfitKey === "none") delete wardrobeSlots[slot];
+      else wardrobeSlots[slot] = outfitKey;
+      const first = Object.values(wardrobeSlots).find(Boolean) || null;
+      return { ...b, wardrobeSlots, outfitKey: first };
+    }));
+    notify(outfitKey === "none" ? "Wardrobe piece removed ✨" : `${outfit.name} equipped ${outfit.emoji}`);
+  };
+
+  const handleUnlockWardrobe = (outfitKey) => {
+    const outfit = OUTFITS[outfitKey];
+    if (!outfit || outfitKey === "none") return;
+    if ((flags.wardrobeInventory || []).includes(outfitKey)) return notify("You already have that wardrobe piece");
+    const cost = outfit.cost ?? 50;
+    if (seeds < cost) return notify("You're a bit short on seeds");
+    setSeeds((s) => s - cost);
+    setFlags((prev) => ({ ...prev, wardrobeInventory: Array.from(new Set([...(prev.wardrobeInventory || ["none", "ribbon"]), outfitKey])) }));
+    notify(`${outfit.name} added to your closet ${outfit.emoji}`);
+  };
+
   const handleRename = (id) => {
     const name = renameDraft.trim().slice(0, 16);
     if (!name) return;
-    setBirds((prev) => prev.map((b) => (b.id === id ? { ...b, name } : b)));
+    setPets((prev) => prev.map((b) => (b.id === id ? { ...b, name } : b)));
     setRenameDraft("");
   };
 
@@ -501,24 +551,25 @@ export default function GameApp({ user, profile, onSignOut }) {
   const resetGame = () => {
     const t = Date.now();
     setSeeds(30);
-    setBirds(defaultBirds());
+    setPets(defaultBirds());
     setLoftCapacity(LOFT_BASE_CAPACITY);
     setUpgradesBought(0);
     setDecorations([]);
+    setFlags({ wardrobeInventory: ["none", "ribbon"] });
     setLastCollectAt(t);
     setSelectedBirdId(null);
     setBreedSelection([]);
     notify("Fresh start — welcome back to day one");
   };
 
-  const selectedBird = birds.find((b) => b.id === selectedBirdId) || null;
+  const selectedBird = pets.find((b) => b.id === selectedBirdId) || null;
 
   if (!loaded) {
     return (
       <div className="site">
         <div className="loading-screen">
           <div className="em">🐹</div>
-          <div className="display" style={{ fontWeight: 700 }}>Waking the Iggies…</div>
+          <div className="display" style={{ fontWeight: 700 }}>Welcome to Iggy Meadow…</div>
         </div>
       </div>
     );
@@ -592,31 +643,65 @@ export default function GameApp({ user, profile, onSignOut }) {
         ))}
       </nav>
 
+      <div className="world-links" aria-label="Iggy Meadow shortcuts">
+        <button onClick={() => setTab("kennel")} className={tab === "kennel" ? "active" : ""}>🏡 Kennel</button>
+        <button onClick={() => { setTab("nests"); setNestsSubtab("adopt"); }} className={tab === "nests" && nestsSubtab === "adopt" ? "active" : ""}>🐕 Adopt</button>
+        <button onClick={() => { setTab("nests"); setNestsSubtab("breed"); }} className={tab === "nests" && nestsSubtab === "breed" ? "active" : ""}>🧬 Breeding</button>
+        <button onClick={() => setTab("events")} className={tab === "events" ? "active" : ""}>🌸 Events</button>
+        <button onClick={() => setTab("explore")} className={tab === "explore" ? "active" : ""}>🗺️ Explore</button>
+        <button onClick={() => setTab("games")} className={tab === "games" ? "active" : ""}>🎮 Games</button>
+        <button onClick={() => { setTab("shop"); setShopSubtab("shop"); }} className={tab === "shop" && shopSubtab === "shop" ? "active" : ""}>🛍️ Shops</button>
+        <button onClick={() => { setTab("shop"); setShopSubtab("wardrobe"); }} className={tab === "shop" && shopSubtab === "wardrobe" ? "active" : ""}>👗 Closet</button>
+      </div>
+
       <main className="content">
-          {tab === "loft" && (
+          {tab === "kennel" && (
             <>
-              <div className="section-title">
-                Your birds ({birds.length}/{loftCapacity})
+              <div className="kennel-toolbar">
+                <div>
+                  <div className="section-title" style={{ marginBottom: 3 }}>My Iggies</div>
+                  <div className="kennel-count">{pets.length} of {loftCapacity} kennel spaces filled</div>
+                </div>
+                <div className="kennel-tools">
+                  <input aria-label="Search Iggies" value={kennelSearch} onChange={(e) => setKennelSearch(e.target.value)} placeholder="Search your Iggies…" />
+                  <select aria-label="Sort Iggies" value={kennelSort} onChange={(e) => setKennelSort(e.target.value)}>
+                    <option value="name">Name</option>
+                    <option value="stage">Life stage</option>
+                    <option value="happiness">Happiness</option>
+                  </select>
+                </div>
               </div>
-              <div className="loft-grid">
-                {birds.map((b) => {
-                  const happiness = computeHappiness(b, now, config, decorBonus);
-                  const busy = b.breedingUntil && b.breedingUntil > now;
-                  return (
-                    <div key={b.id} className={`bird-card${busy ? " busy" : ""}`} onClick={() => setSelectedBirdId(b.id)}>
-                      <PetArt speciesKey={b.speciesKey} colorKey={b.colorKey} stage={b.stage} size={58} />
-                      <div className="bname">{b.name || "?"}</div>
-                      <div className="bspecies">
-                        {b.stage === "egg" ? `hatches ${formatDuration(b.hatchAt - now)}` : b.stage === "baby" ? `growing ${formatDuration(b.growAt - now)}` : SPECIES[b.speciesKey].name}
-                      </div>
-                      {b.stage !== "egg" && <StatBar value={happiness} color="var(--sage)" />}
-                    </div>
-                  );
-                })}
-                {Array.from({ length: Math.max(0, loftCapacity - birds.length) }).map((_, i) => (
-                  <div className="empty-slot" key={i}>An empty spot — adopt or breed an Iggy to fill it</div>
-                ))}
-              </div>
+              {pets.length === 0 ? (
+                <div className="kennel-empty">
+                  <div className="kennel-empty-art">🐕</div>
+                  <h3>Your kennel is waiting</h3>
+                  <p>Adopt your first Italian Greyhound to begin your collection.</p>
+                  <button className="btn btn-primary" onClick={() => { setTab("nests"); setNestsSubtab("adopt"); }}>Adopt an Iggy</button>
+                </div>
+              ) : kennelPets.length === 0 ? (
+                <div className="kennel-empty"><h3>No Iggies found</h3><p>Try a different name or clear the search.</p></div>
+              ) : (
+                <div className="loft-grid">
+                  {kennelPets.map((b) => {
+                    const happiness = computeHappiness(b, now, config, decorBonus);
+                    const busy = b.breedingUntil && b.breedingUntil > now;
+                    return (
+                      <button type="button" key={b.id} className={`pet-card${busy ? " busy" : ""}`} onClick={() => { setSelectedBirdId(b.id); setProfileTab("about"); }}>
+                        <PetArt speciesKey={b.speciesKey} colorKey={b.colorKey} stage={b.stage} outfitKey={b.outfitKey || null} wardrobeSlots={normalizeWardrobeSlots(b)} size={74} />
+                        <div className="bname">{b.name || "Unnamed Iggy"}</div>
+                        <div className="bspecies">
+                          {b.stage === "egg" ? `Hatches ${formatDuration(b.hatchAt - now)}` : b.stage === "baby" ? `Puppy · grows ${formatDuration(b.growAt - now)}` : "Italian Greyhound"}
+                        </div>
+                        {b.stage !== "egg" && <StatBar value={happiness} color="var(--sage)" />}
+                        {b.outfitKey && b.outfitKey !== "none" && <div className="pet-card-tag">✨ {b.outfitKey}</div>}
+                      </button>
+                    );
+                  })}
+                  {Array.from({ length: Math.max(0, loftCapacity - pets.length) }).map((_, i) => (
+                    <button type="button" className="empty-slot" key={i} onClick={() => { setTab("nests"); setNestsSubtab("adopt"); }}>+ Empty kennel space</button>
+                  ))}
+                </div>
+              )}
             </>
           )}
 
@@ -636,9 +721,9 @@ export default function GameApp({ user, profile, onSignOut }) {
                       <PetArt speciesKey={key} colorKey={sp.colors[0]} stage="adult" size={46} />
                       <div className="info">
                         <div className="nm">{sp.name}</div>
-                        <div className="sub">{adoptCost(config, key, birds.length)} seeds</div>
+                        <div className="sub">{adoptCost(config, key, pets.length)} seeds</div>
                       </div>
-                      <button className="btn btn-primary" onClick={() => handleAdopt(key)} disabled={birds.length >= loftCapacity || seeds < adoptCost(config, key, birds.length)}>
+                      <button className="btn btn-primary" onClick={() => handleAdopt(key)} disabled={pets.length >= loftCapacity || seeds < adoptCost(config, key, pets.length)}>
                         Adopt
                       </button>
                     </div>
@@ -647,11 +732,11 @@ export default function GameApp({ user, profile, onSignOut }) {
                 </>
               ) : (
                 <>
-                  <div className="section-title">Pair Up Two Iggies</div>
+                  <div className="section-title">Find a Match for Two Iggies</div>
                   <div style={{ fontSize: 12, color: "var(--ink-soft)", marginBottom: 10 }}>
-                    Pick one male ♂ and one female ♀ adult bird. Nesting costs {config.breedCost} seeds and takes {formatDuration(config.eggHatchHours * HOUR)}.
+                    Pick one male ♂ and one female ♀ adult Iggy. Nesting costs {config.breedCost} seeds and takes {formatDuration(config.eggHatchHours * HOUR)}.
                   </div>
-                  {birds.filter((b) => b.stage === "adult").map((b) => {
+                  {pets.filter((b) => b.stage === "adult").map((b) => {
                     const busy = b.breedingUntil && b.breedingUntil > now;
                     const selected = breedSelection.includes(b.id);
                     return (
@@ -666,7 +751,7 @@ export default function GameApp({ user, profile, onSignOut }) {
                       </div>
                     );
                   })}
-                  <button className="btn btn-secondary" style={{ width: "100%", marginTop: 8, padding: "12px" }} onClick={handleBreed} disabled={!canBreed || seeds < config.breedCost || birds.length >= loftCapacity}>
+                  <button className="btn btn-secondary" style={{ width: "100%", marginTop: 8, padding: "12px" }} onClick={handleBreed} disabled={!canBreed || seeds < config.breedCost || pets.length >= loftCapacity}>
                     Start breeding ({config.breedCost} seeds)
                   </button>
                 </>
@@ -727,14 +812,14 @@ export default function GameApp({ user, profile, onSignOut }) {
                 <HarvestWheel prizes={halloweenWheelPrizes} cost={40} seeds={seeds} onResult={handleWheelResult} />
               ) : (
                 <div className="item-grid">
-                {config.seasonalBirds.filter((b) => b.season === eventsSubtab).map((sb) => (
+                {config.seasonalIggies.filter((b) => b.season === eventsSubtab).map((sb) => (
                   <div className="market-item" key={sb.key}>
                     <PetArt speciesKey={sb.speciesKey} colorKey={sb.colorKey} stage="adult" size={46} />
                     <div className="info">
                       <div className="nm">{sb.name}</div>
                       <div className="sub">{sb.cost} seeds</div>
                     </div>
-                    <button className="btn btn-primary" onClick={() => handleAdoptSeasonal(sb)} disabled={birds.length >= loftCapacity || seeds < sb.cost}>
+                    <button className="btn btn-primary" onClick={() => handleAdoptSeasonal(sb)} disabled={pets.length >= loftCapacity || seeds < sb.cost}>
                       Adopt
                     </button>
                   </div>
@@ -748,7 +833,7 @@ export default function GameApp({ user, profile, onSignOut }) {
 
           {tab === "explore" && (
             <Explore
-              birds={birds}
+              birds={pets}
               bots={BOTS}
               exploreStage={exploreStage}
               explorerId={explorerId}
@@ -762,7 +847,7 @@ export default function GameApp({ user, profile, onSignOut }) {
 
           {tab === "games" && (
             <>
-              <div className="section-title">Games at the Roost</div>
+              <div className="section-title">Games in the Meadow</div>
               <div className="item-grid">
               <div className="market-item">
                 <div style={{ fontSize: 28 }}>🧱</div>
@@ -781,10 +866,10 @@ export default function GameApp({ user, profile, onSignOut }) {
                 <button className="btn btn-primary" onClick={() => setActiveGame("match")}>Play</button>
               </div>
               <div className="market-item">
-                <div style={{ fontSize: 28 }}>🐦</div>
+                <div style={{ fontSize: 28 }}>🐕</div>
                 <div className="info">
                   <div className="nm">Sky Dash</div>
-                  <div className="sub">Flap between the vines, endless</div>
+                  <div className="sub">Sprint through the meadow, endless</div>
                 </div>
                 <button className="btn btn-primary" onClick={() => setActiveGame("skydash")}>Play</button>
               </div>
@@ -800,7 +885,7 @@ export default function GameApp({ user, profile, onSignOut }) {
                 <div style={{ fontSize: 28 }}>⛈️</div>
                 <div className="info">
                   <div className="nm">Storm Chase</div>
-                  <div className="sub">Outfly the storm, manage your boost</div>
+                  <div className="sub">Race the storm, manage your boost</div>
                 </div>
                 <button className="btn btn-primary" onClick={() => setActiveGame("stormchase")}>Play</button>
               </div>
@@ -821,9 +906,9 @@ export default function GameApp({ user, profile, onSignOut }) {
                 <button className="btn btn-primary" onClick={() => setActiveGame("trivia")}>Play</button>
               </div>
               <div className="market-item">
-                <div style={{ fontSize: 28 }}>🪹</div>
+                <div style={{ fontSize: 28 }}>🌾</div>
                 <div className="info">
-                  <div className="nm">Nest Catch</div>
+                  <div className="nm">Seed Catch</div>
                   <div className="sub">Catch falling seeds before time runs out</div>
                 </div>
                 <button className="btn btn-primary" onClick={() => setActiveGame("nestcatch")}>Play</button>
@@ -834,6 +919,14 @@ export default function GameApp({ user, profile, onSignOut }) {
 
           {tab === "shop" && (
             <>
+              <div className="shop-subnav">
+                <button className={shopSubtab === "shop" ? "active" : ""} onClick={() => setShopSubtab("shop")}>🌾 Meadow Shop</button>
+                <button className={shopSubtab === "wardrobe" ? "active" : ""} onClick={() => setShopSubtab("wardrobe")}>👗 Wardrobe</button>
+              </div>
+              {shopSubtab === "wardrobe" ? (
+                <Wardrobe pets={pets} flags={flags} seeds={seeds} selectedPetId={selectedBirdId} onSelectPet={(id) => { setSelectedBirdId(id); setProfileTab("wardrobe"); }} onEquip={handleEquipOutfit} onUnlock={handleUnlockWardrobe} />
+              ) : (
+                <>
               <div className="section-title">Expand the Kennel</div>
               <div className="decor-item">
                 <div style={{ fontSize: 26 }}>🏗️</div>
@@ -900,6 +993,8 @@ export default function GameApp({ user, profile, onSignOut }) {
               <button className="btn btn-ghost" style={{ width: "100%", marginTop: 18 }} onClick={resetGame}>
                 Reset progress
               </button>
+                </>
+              )}
             </>
           )}
         </main>
@@ -908,58 +1003,126 @@ export default function GameApp({ user, profile, onSignOut }) {
 
         {selectedBird && (
           <Modal onClose={() => { setSelectedBirdId(null); setRenameDraft(""); }}>
-            <div style={{ textAlign: "center" }}>
-              <PetArt speciesKey={selectedBird.speciesKey} colorKey={selectedBird.colorKey} stage={selectedBird.stage} size={100} />
-              <div style={{ fontFamily: "'Fraunces', serif", fontSize: 19, marginTop: 4 }}>
-                {selectedBird.name} <span className={`gender ${selectedBird.gender}`}>{selectedBird.gender === "m" ? "♂" : "♀"}</span>
+            <div className="iggy-profile-head">
+              <div className="iggy-profile-art">
+                <PetArt speciesKey={selectedBird.speciesKey} colorKey={selectedBird.colorKey} stage={selectedBird.stage} outfitKey={selectedBird.outfitKey || null} wardrobeSlots={normalizeWardrobeSlots(selectedBird)} size={150} />
               </div>
-              <div style={{ fontSize: 12.5, color: "var(--ink-soft)", marginBottom: 8 }}>{SPECIES[selectedBird.speciesKey].name}</div>
+              <div className="iggy-profile-heading">
+                <div className="iggy-profile-kicker">MY IGGY</div>
+                <h2>{selectedBird.name || "Unnamed Iggy"}</h2>
+                <div className="iggy-profile-sub">
+                  <span className={`gender ${selectedBird.gender}`}>{selectedBird.gender === "m" ? "♂ Male" : "♀ Female"}</span>
+                  <span>Italian Greyhound</span>
+                  <span>{selectedBird.stage === "adult" ? "Adult" : selectedBird.stage === "baby" ? "Puppy" : "Egg"}</span>
+                </div>
+              </div>
             </div>
 
-            {selectedBird.stage === "egg" ? (
-              <div style={{ textAlign: "center", fontWeight: 700, padding: "10px 0" }}>Hatches in {formatDuration(selectedBird.hatchAt - now)}</div>
-            ) : (
-              <>
-                <div className="stat-row">
-                  <span style={{ width: 78 }}>Life</span>
-                  <StatBar value={getLife(selectedBird)} color="#B96A34" />
+            <div className="profile-tabs" role="tablist" aria-label="Iggy profile sections">
+              {[
+                ["about", "About"],
+                ["appearance", "Appearance"],
+                ["care", "Care"],
+                ["genetics", "Genetics"],
+                ["wardrobe", "Wardrobe"],
+                ["history", "History"],
+              ].map(([key, label]) => (
+                <button key={key} type="button" className={profileTab === key ? "active" : ""} onClick={() => setProfileTab(key)}>{label}</button>
+              ))}
+            </div>
+
+            {profileTab === "about" && (
+              <div className="profile-panel">
+                <div className="profile-facts">
+                  <div><span>Name</span><strong>{selectedBird.name || "Unnamed Iggy"}</strong></div>
+                  <div><span>Breed</span><strong>Italian Greyhound</strong></div>
+                  <div><span>Sex</span><strong>{selectedBird.gender === "m" ? "Male" : "Female"}</strong></div>
+                  <div><span>Life stage</span><strong>{selectedBird.stage === "adult" ? "Adult" : selectedBird.stage === "baby" ? "Puppy" : "Egg"}</strong></div>
+                  <div><span>Current outfit</span><strong>{getOutfit(selectedBird.outfitKey).name}</strong></div>
+                  <div><span>Strength</span><strong>{getStrength(selectedBird)}</strong></div>
+                  <div><span>Wisdom</span><strong>{getWisdom(selectedBird)}</strong></div>
+                  <div><span>Life</span><strong>{getLife(selectedBird)} / {getMaxLife(selectedBird)}</strong></div>
                 </div>
-                <div className="stat-row">
-                  <span style={{ width: 78 }}>Hunger</span>
-                  <StatBar value={computeHunger(selectedBird, now, config)} color="#D9A441" />
-                </div>
-                <div className="stat-row">
-                  <span style={{ width: 78 }}>Clean</span>
-                  <StatBar value={computeClean(selectedBird, now, config)} color="#7FA6C9" />
-                </div>
-                <div className="stat-row">
-                  <span style={{ width: 78 }}>Happiness</span>
-                  <StatBar value={computeHappiness(selectedBird, now, config, decorBonus)} color="var(--sage)" />
-                </div>
-                {selectedBird.stage === "baby" && (
-                  <div style={{ fontSize: 12, color: "var(--ink-soft)", margin: "8px 0" }}>Grows up in {formatDuration(selectedBird.growAt - now)}</div>
-                )}
-                <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-                  <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => handleFeed(selectedBird.id)} disabled={seeds < config.feedCost}>
-                    Feed ({config.feedCost}🌾)
-                  </button>
-                  <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => handleClean(selectedBird.id)}>
-                    Bathe
-                  </button>
-                </div>
-              </>
+                <div className="profile-note">Every Iggy has a little story of their own. As the Meadow grows, this page will become the home for that story.</div>
+              </div>
             )}
 
-            <div style={{ marginTop: 16 }}>
-              <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 6 }}>Rename</div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <input type="text" placeholder={selectedBird.name} value={renameDraft} onChange={(e) => setRenameDraft(e.target.value)} />
-                <button className="btn btn-ghost" onClick={() => handleRename(selectedBird.id)}>Save</button>
+            {profileTab === "appearance" && (
+              <div className="profile-panel">
+                <div className="appearance-preview">
+                  <PetArt speciesKey={selectedBird.speciesKey} colorKey={selectedBird.colorKey} stage={selectedBird.stage} outfitKey={selectedBird.outfitKey || null} wardrobeSlots={normalizeWardrobeSlots(selectedBird)} size={190} />
+                </div>
+                <div className="profile-facts">
+                  <div><span>Body type</span><strong>{SPECIES[selectedBird.speciesKey]?.name?.replace("Italian Greyhound · ", "") || "Iggy"}</strong></div>
+                  <div><span>Coat</span><strong>{selectedBird.colorKey}</strong></div>
+                  <div><span>Base species key</span><strong>{selectedBird.speciesKey}</strong></div>
+                  <div><span>Visual layers</span><strong>Coat · markings · eyes · wardrobe · effects</strong></div>
+                </div>
               </div>
+            )}
+
+            {profileTab === "care" && (
+              <div className="profile-panel">
+                {selectedBird.stage === "egg" ? (
+                  <div className="profile-empty"><div className="profile-empty-icon">🥚</div><strong>Growing safely in the nest</strong><span>Hatches in {formatDuration(selectedBird.hatchAt - now)}</span></div>
+                ) : (
+                  <>
+                    <div className="stat-row"><span>Life</span><StatBar value={(getLife(selectedBird) / getMaxLife(selectedBird)) * 100} color="#B96A34" /></div>
+                    <div className="stat-row"><span>Hunger</span><StatBar value={computeHunger(selectedBird, now, config)} color="#D9A441" /></div>
+                    <div className="stat-row"><span>Clean</span><StatBar value={computeClean(selectedBird, now, config)} color="#7FA6C9" /></div>
+                    <div className="stat-row"><span>Happiness</span><StatBar value={computeHappiness(selectedBird, now, config, decorBonus)} color="var(--sage-deep)" /></div>
+                    {selectedBird.stage === "baby" && <div className="profile-note">This puppy grows up in {formatDuration(selectedBird.growAt - now)}.</div>}
+                    <div className="profile-actions">
+                      <button className="btn btn-primary" onClick={() => handleFeed(selectedBird.id)} disabled={seeds < config.feedCost}>Feed ({config.feedCost}🌾)</button>
+                      <button className="btn btn-secondary" onClick={() => handleClean(selectedBird.id)}>Bathe</button>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {profileTab === "genetics" && (
+              <div className="profile-panel">
+                <div className="genetics-card"><span>Species</span><strong>Italian Greyhound</strong><small>{selectedBird.speciesKey}</small></div>
+                <div className="genetics-card"><span>Coat color</span><strong>{selectedBird.colorKey}</strong><small>Inherited/selected coat record</small></div>
+                {(() => {
+                  const g = normalizeGenetics(selectedBird);
+                  const mother = pets.find((p) => p.id === selectedBird.lineage?.motherId);
+                  const father = pets.find((p) => p.id === selectedBird.lineage?.fatherId);
+                  return <>
+                    <div className="genetics-card"><span>Generation</span><strong>{g.generation === 0 ? "Foundation" : `Generation ${g.generation}`}</strong><small>{geneticRarity(selectedBird)} genetic rarity</small></div>
+                    <div className="genetics-card"><span>Inherited traits</span><strong>{g.traits.length ? g.traits.map(traitLabel).join(" · ") : "No special traits recorded"}</strong><small>{g.traits.length ? g.traits.map(traitEmoji).join(" ") : "A clean foundation line"}</small></div>
+                    <div className="genetics-card"><span>Parentage</span><strong>{mother || father ? `${mother?.name || "Unknown mother"} × ${father?.name || "Unknown father"}` : "Foundation Iggy"}</strong><small>{selectedBird.lineage?.bredAt ? new Date(selectedBird.lineage.bredAt).toLocaleString() : "No parents recorded"}</small></div>
+                    <div className="profile-note">Genetics are additive and backward-compatible. Older Iggies remain foundation animals, while every new bred Iggy receives a generation, inherited traits, and a permanent parent record.</div>
+                  </>;
+                })()}
+              </div>
+            )}
+
+            {profileTab === "wardrobe" && (
+              <div className="profile-panel">
+                <Wardrobe pets={pets} flags={flags} seeds={seeds} selectedPetId={selectedBird.id} onSelectPet={setSelectedBirdId} onEquip={handleEquipOutfit} onUnlock={handleUnlockWardrobe} />
+              </div>
+            )}
+
+            {profileTab === "history" && (
+              <div className="profile-panel">
+                <div className="history-list">
+                  <div><span className="history-dot">🐾</span><div><strong>Joined the Meadow</strong><small>{new Date(selectedBird.bornAt || Date.now()).toLocaleString()}</small></div></div>
+                  {selectedBird.stage !== "egg" && <div><span className="history-dot">🌱</span><div><strong>{selectedBird.stage === "adult" ? "Reached adulthood" : "Became a puppy"}</strong><small>{selectedBird.stage === "adult" && selectedBird.growAt ? new Date(selectedBird.growAt).toLocaleString() : "Growth record"}</small></div></div>}
+                  {selectedBird.lineage?.bredAt && <div><span className="history-dot">🧬</span><div><strong>Born from a Meadow pairing</strong><small>{new Date(selectedBird.lineage.bredAt).toLocaleString()}</small></div></div>}
+                  <div><span className="history-dot">🎀</span><div><strong>{getOutfit(selectedBird.outfitKey).name}</strong><small>Current wardrobe record</small></div></div>
+                </div>
+                <div className="profile-note">More milestones—adoptions, breeding, competitions, discoveries, outfits, and achievements—will accumulate here as those systems mature.</div>
+              </div>
+            )}
+
+            <div className="profile-rename">
+              <label htmlFor="iggy-rename">Rename Iggy</label>
+              <div><input id="iggy-rename" type="text" placeholder={selectedBird.name || "New name"} value={renameDraft} onChange={(e) => setRenameDraft(e.target.value)} /><button className="btn btn-ghost" onClick={() => handleRename(selectedBird.id)}>Save</button></div>
             </div>
           </Modal>
         )}
-
         {dailyReward && (
           <div className="modal-backdrop">
             <div className="modal-sheet centered" style={{ textAlign: "center" }}>

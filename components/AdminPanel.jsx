@@ -61,7 +61,7 @@ export default function AdminPanel({ config, onClose, onSave, saving }) {
           <input type="number" value={draft.upgradeBaseCost} onChange={(e) => setField("upgradeBaseCost", Number(e.target.value))} style={{ width: 70 }} />
         </div>
         <div className="admin-row">
-          <span style={{ width: 160, fontSize: 12.5, fontWeight: 700 }}>Seeds earned / bird / hour</span>
+          <span style={{ width: 160, fontSize: 12.5, fontWeight: 700 }}>Seeds earned / Iggy / hour</span>
           <input type="number" step="0.1" value={draft.incomeBaseRate} onChange={(e) => setField("incomeBaseRate", Number(e.target.value))} style={{ width: 70 }} />
         </div>
 
@@ -93,7 +93,7 @@ export default function AdminPanel({ config, onClose, onSave, saving }) {
         {renderItemList("halloweenItems", "🎃 Halloween decorations")}
 
         <div style={{ marginBottom: 18 }}>
-          <div className="section-title">Exclusive seasonal birds</div>
+          <div className="section-title">Exclusive seasonal Iggies</div>
           {draft.seasonalBirds.map((b, idx) => (
             <div className="admin-row" key={b.key} style={{ flexWrap: "wrap" }}>
               <input type="text" value={b.name} onChange={(e) => updateListItem("seasonalBirds", idx, "name", e.target.value)} style={{ flex: "1 1 100%", marginBottom: 4 }} />
@@ -115,8 +115,8 @@ export default function AdminPanel({ config, onClose, onSave, saving }) {
               <button className="btn btn-ghost" onClick={() => removeListItem("seasonalBirds", idx)}>✕</button>
             </div>
           ))}
-          <button className="btn btn-secondary" style={{ marginTop: 6 }} onClick={() => addListItem("seasonalBirds", { name: "New Bird", speciesKey: "rock", colorKey: "slate", cost: 50, season: "christmas" })}>
-            + Add bird
+          <button className="btn btn-secondary" style={{ marginTop: 6 }} onClick={() => addListItem("seasonalBirds", { name: "New Iggy", speciesKey: "rock", colorKey: "slate", cost: 50, season: "christmas" })}>
+            + Add Iggy
           </button>
         </div>
 

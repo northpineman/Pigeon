@@ -1,3 +1,6 @@
+
+## Current build: v8 — Layered Meadow Closet
+
 # Deploying PigeonsnDoves
 
 This is a real website: people can sign up with an email + password, keep their
@@ -158,7 +161,7 @@ the site/tab isn't open.
 1. A working set of notification keys was already generated for you:
    ```
    VAPID_PUBLIC_KEY=BJdX-UMVvXuCRLhRTKKbm3IK7Aoc2nCl0sNT8HyCBCkwXStGfDrsDhLormSeip8bSkp1iX3Ialiy4Kw7jbSsryo
-   VAPID_PRIVATE_KEY=49Qkq8oOHcNS9pJjT2upqRYdeGnJhoZZZZYjen6sioI
+   VAPID_PRIVATE_KEY=[REDACTED — configure via environment variable]
    ```
    In Vercel -> Settings -> Environment Variables, add:
    - `VAPID_PUBLIC_KEY` = the public key above

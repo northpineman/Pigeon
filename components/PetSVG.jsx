@@ -1,10 +1,14 @@
 "use client";
+import { useId } from "react";
 import { SPECIES, COLOR_HEX, SPECIAL_OVERLAY } from "@/lib/gameData";
 
-export default function PetSVG({ speciesKey, colorKey, stage, size = 76 }) {
+export default function PetSVG({ speciesKey, colorKey, stage, outfitKey = null, wardrobeSlots = null, size = 76 }) {
   const sp = SPECIES[speciesKey] || SPECIES.rock;
   const col = COLOR_HEX[colorKey] || COLOR_HEX.slate;
-  const gradId = `bg-${speciesKey}-${colorKey}-${stage}`;
+  const reactId = useId().replace(/:/g, "");
+  const slots = wardrobeSlots || (outfitKey ? { body: outfitKey } : {});
+  const equipped = new Set(Object.values(slots).filter(Boolean));
+  const gradId = `bg-${reactId}`;
 
   const shadingDefs = (
     <defs>
@@ -146,6 +150,71 @@ export default function PetSVG({ speciesKey, colorKey, stage, size = 76 }) {
       {/* eye */}
       <circle cx={headCx - headLen * 0.15} cy={headCy - headH * 0.15} r={1.9 * s} fill="#2B2730" />
       <circle cx={headCx - headLen * 0.05} cy={headCy - headH * 0.35} r={0.8 * s} fill="#fff" />
+      {equipped.has("ribbon") && (
+        <>
+          <path d="M 38 47 Q 50 52 62 47" fill="none" stroke="#D85A88" strokeWidth="3.2" strokeLinecap="round" />
+          <path d="M 50 50 C 43 44 38 46 42 52 C 45 55 49 53 50 50 Z" fill="#F08FB3" stroke="#7D405C" strokeWidth="0.9" />
+          <path d="M 50 50 C 57 44 62 46 58 52 C 55 55 51 53 50 50 Z" fill="#F08FB3" stroke="#7D405C" strokeWidth="0.9" />
+          <circle cx="50" cy="50" r="2.2" fill="#F7C96B" />
+        </>
+      )}
+      {equipped.has("berry") && (
+        <>
+          <path d="M 38 47 Q 50 54 62 47 L 61 56 Q 50 63 39 56 Z" fill="#9A526B" stroke="#5B3B49" strokeWidth="1" />
+          <path d="M 41 51 Q 50 57 59 51 M 41 54 Q 50 60 59 54" fill="none" stroke="#D98BA3" strokeWidth="1" opacity="0.8" />
+        </>
+      )}
+      {equipped.has("peppermint") && (
+        <>
+          <path d="M 35 45 Q 50 52 65 45 L 64 62 Q 50 70 36 62 Z" fill="#D94C57" stroke="#73343B" strokeWidth="1.2" />
+          <path d="M 39 47 L 61 61 M 45 48 L 64 58 M 36 53 L 55 65" stroke="#FFF6E8" strokeWidth="3" opacity="0.9" />
+          <path d="M 38 45 Q 50 52 62 45" fill="none" stroke="#F7D8D2" strokeWidth="1.5" />
+          <path d="M 60 40 C 66 34 72 38 68 43 C 64 48 59 45 60 40 Z" fill="#477A4F" stroke="#315238" strokeWidth="1" />
+          <path d="M 68 43 C 73 38 78 43 73 47 C 68 50 65 46 68 43 Z" fill="#5C8A57" stroke="#315238" strokeWidth="1" />
+          <circle cx="66" cy="43" r="2.5" fill="#D9444D" />
+          <path d="M 30 35 C 28 30 32 27 35 30" fill="none" stroke="#F2D4D0" strokeWidth="2" strokeLinecap="round" />
+          <path d="M 70 31 C 73 27 77 30 75 34" fill="none" stroke="#F2D4D0" strokeWidth="2" strokeLinecap="round" />
+        </>
+      )}
+      {equipped.has("blossom") && (
+        <>
+          <path d="M 35 36 Q 50 24 65 36" fill="none" stroke="#5D8FB5" strokeWidth="2.4" strokeLinecap="round" />
+          {[38,47,57,64].map((x,i)=><g key={`blossom-${i}`}><circle cx={x} cy={32+(i%2)*2} r="3.2" fill="#A8CBEA"/><circle cx={x} cy={32+(i%2)*2} r="1.1" fill="#F7D67B"/></g>)}
+        </>
+      )}
+      {equipped.has("snowcap") && (
+        <>
+          <path d="M 34 39 Q 49 25 65 39 L 62 44 Q 49 34 37 44 Z" fill="#DCEAF3" stroke="#7A9AAD" strokeWidth="1" />
+          <path d="M 39 36 Q 50 29 61 37" fill="none" stroke="#FFFFFF" strokeWidth="1.5" />
+          <circle cx="42" cy="34" r="1.2" fill="#8CB7D3"/><circle cx="57" cy="32" r="1.2" fill="#8CB7D3"/>
+        </>
+      )}
+      {equipped.has("pear") && (
+        <>
+          <path d="M 36 45 Q 50 51 64 45 L 67 65 Q 50 73 33 65 Z" fill="#D4A83A" stroke="#806522" strokeWidth="1.1" />
+          <path d="M 50 47 Q 54 40 59 38" fill="none" stroke="#5D7B43" strokeWidth="2" strokeLinecap="round" />
+          <path d="M 58 40 Q 64 35 67 40 Q 62 44 58 40 Z" fill="#7EAA5D" />
+        </>
+      )}
+      {equipped.has("dogwood") && (
+        <>
+          <path d="M 39 46 Q 50 52 61 46" fill="none" stroke="#6F8F5C" strokeWidth="2.4" />
+          <path d="M 50 48 Q 46 41 42 40 M 50 48 Q 55 41 59 40" stroke="#6F8F5C" strokeWidth="1.4" fill="none" />
+          <circle cx="42" cy="40" r="3.2" fill="#F4F0EA" stroke="#B8A58F"/><circle cx="59" cy="40" r="3.2" fill="#F4F0EA" stroke="#B8A58F"/>
+        </>
+      )}
+      {equipped.has("starlight") && (
+        <>
+          <path d="M 34 47 Q 50 53 66 47 L 64 67 Q 50 74 36 67 Z" fill="#6C668F" opacity=".9" stroke="#4C486B" />
+          {[39,48,58,63].map((x,i)=><path key={`star-${i}`} d={`M ${x} ${54+(i%2)*7} l 1 2 l 2 1 l-2 1 l-1 2 l-1-2 l-2-1 l2-1 Z`} fill="#FFF4B8"/>)}
+        </>
+      )}
+      {equipped.has("firefly") && (
+        <>
+          {[29,71,34,67].map((x,i)=><circle key={`glow-${i}`} cx={x} cy={31+(i%2)*10} r={i<2?2.5:1.7} fill="#F6D66F" opacity=".85" />)}
+          <circle cx="29" cy="31" r="6" fill="#F6D66F" opacity=".12"/><circle cx="71" cy="31" r="6" fill="#F6D66F" opacity=".12"/>
+        </>
+      )}
     </svg>
   );
 }

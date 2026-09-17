@@ -69,7 +69,7 @@ export default function HomePage() {
     return (
       <div className="site">
         <div className="loading-screen">
-          <div className="em">🕊️</div>
+          <div className="em">🐕</div>
           <div style={{ fontFamily: "'Fraunces', serif", fontWeight: 700 }}>Loading…</div>
         </div>
       </div>

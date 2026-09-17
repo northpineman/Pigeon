@@ -7,10 +7,12 @@ import { getLookImage } from "@/lib/looks";
 // this species+color combo, otherwise falls back to the procedural
 // shape so every pet still has *something* to display before its
 // artwork exists.
-export default function PetArt({ speciesKey, colorKey, stage, size = 76 }) {
-  const lookSrc = stage !== "egg" ? getLookImage(speciesKey, colorKey) : null;
+export default function PetArt({ speciesKey, colorKey, stage, outfitKey = null, wardrobeSlots = null, size = 76 }) {
+  const lookSrc = stage !== "egg" ? getLookImage(speciesKey, colorKey, outfitKey) : null;
+  const hasCustomOutfit = Boolean((outfitKey && outfitKey !== "none") || (wardrobeSlots && Object.values(wardrobeSlots).some(Boolean)));
+  const shouldUsePaintedLook = Boolean(lookSrc && !hasCustomOutfit);
 
-  if (lookSrc) {
+  if (shouldUsePaintedLook) {
     return (
       <img
         src={lookSrc}
@@ -22,5 +24,5 @@ export default function PetArt({ speciesKey, colorKey, stage, size = 76 }) {
     );
   }
 
-  return <PetSVG speciesKey={speciesKey} colorKey={colorKey} stage={stage} size={size} />;
+  return <PetSVG speciesKey={speciesKey} colorKey={colorKey} stage={stage} outfitKey={outfitKey} wardrobeSlots={wardrobeSlots} size={size} />;
 }

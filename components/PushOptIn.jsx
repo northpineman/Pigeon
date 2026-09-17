@@ -105,7 +105,7 @@ export default function PushOptIn({ userId }) {
       {status === "unsubscribed" && (
         <>
           <div style={{ fontSize: 13, color: "var(--ink-soft)", marginBottom: 12 }}>
-            Get a gentle daily reminder when your birds and seeds are waiting for you.
+            Get a gentle daily reminder when your Iggies and seeds are waiting for you.
           </div>
           <button className="btn btn-primary" onClick={enable} disabled={busy}>
             {busy ? "Enabling…" : "Enable notifications"}
