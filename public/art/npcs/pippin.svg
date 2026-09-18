@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 380" role="img" aria-label="Pippin, Toy Chest Keeper">
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f5eee4"/><stop offset="1" stop-color="#fff7e8"/></linearGradient>
+ <radialGradient id="halo"><stop stop-color="#fff" stop-opacity=".92"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+</defs>
+<rect width="320" height="380" rx="26" fill="url(#bg)"/>
+<circle cx="160" cy="126" r="116" fill="url(#halo)"/>
+<path d="M48 327 Q70 247 116 228 Q128 216 137 212 Q183 210 204 226 Q250 244 274 327Z" fill="#c8b8a6" stroke="#6e5c54" stroke-width="7"/>
+<path d="M114 239 Q128 193 133 153 Q137 105 153 81 Q169 59 194 66 Q215 71 220 94 Q221 115 203 127 Q195 134 196 150 Q202 186 210 236Z" fill="#c8b8a6" stroke="#6e5c54" stroke-width="7"/>
+<path d="M149 82 Q126 40 100 47 Q99 78 133 105Z" fill="#c8b8a6" stroke="#6e5c54" stroke-width="7"/>
+<path d="M190 72 Q218 38 244 54 Q237 83 209 105Z" fill="#c8b8a6" stroke="#6e5c54" stroke-width="7"/>
+<path d="M150 83 Q130 60 114 61 Q118 82 136 96Z" fill="#79a7a0" opacity=".6"/>
+<path d="M193 78 Q217 56 232 63 Q225 82 208 96Z" fill="#79a7a0" opacity=".6"/>
+<path d="M152 122 Q170 108 194 115 Q210 121 209 139 Q206 158 180 165 Q156 170 143 157 Q136 146 140 134Z" fill="#f7e7d6" opacity=".52"/>
+<ellipse cx="158" cy="116" rx="7" ry="9" fill="#6e5c54"/><ellipse cx="195" cy="116" rx="7" ry="9" fill="#6e5c54"/>
+<circle cx="160" cy="113" r="2.2" fill="#fff"/><circle cx="197" cy="113" r="2.2" fill="#fff"/>
+<path d="M203 137 Q218 142 215 151 Q209 158 197 153" fill="#6e5c54"/>
+<path d="M184 164 Q182 181 174 190" fill="none" stroke="#6e5c54" stroke-width="4" stroke-linecap="round"/>
+<path d="M122 236 Q159 252 205 230" fill="none" stroke="#79a7a0" stroke-width="12" stroke-linecap="round"/>
+<circle cx="165" cy="245" r="14" fill="#e0a06f" stroke="#6e5c54" stroke-width="4"/><path d="M160 245 l5 6 7-11" fill="none" stroke="#fff8dd" stroke-width="3"/>
+<path d="M72 326 Q160 301 248 326" fill="none" stroke="#e0a06f" stroke-width="5" opacity=".38"/>
+<rect x="33" y="309" width="254" height="55" rx="13" fill="#fff7e9" stroke="#6e5c54" stroke-width="4"/>
+<text x="160" y="332" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="19" fill="#6e5c54">Pippin</text>
+<text x="160" y="350" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" letter-spacing="1.4" fill="#6e5c54" opacity=".72">TOY CHEST KEEPER</text>
+<circle cx="45" cy="42" r="13" fill="#79a7a0" opacity=".72"/><path d="M42 42 l3 4 7-9" fill="none" stroke="#fff" stroke-width="2.5"/>
+</svg>

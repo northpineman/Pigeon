@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="300" viewBox="0 0 420 300">
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe7f4"/><stop offset="1" stop-color="#f5e8bf"/></linearGradient>
+  <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fc982"/><stop offset="1" stop-color="#6e9f68"/></linearGradient>
+  <filter id="shadow"><feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#5c4632" flood-opacity=".25"/></filter>
+  <filter id="soft"><feGaussianBlur stdDeviation="6"/></filter>
+</defs>
+<rect width="420" height="300" rx="28" fill="url(#sky)"/>
+<path d="M0 205Q88 161 179 203T420 194V300H0Z" fill="url(#grass)"/>
+<ellipse cx="210" cy="250" rx="150" ry="25" fill="#4f6f46" opacity=".2"/>
+<g filter="url(#shadow)">
+  <rect x="95" y="122" width="230" height="118" rx="12" fill="#f5d7df" stroke="#755866" stroke-width="7"/>
+  <path d="M88 128h244l-18-42H106Z" fill="#8d6ea1" stroke="#665073" stroke-width="7"/>
+  <path d="M106 128v28h40v-28m0 0v28h40v-28m0 0v28h40v-28m0 0v28h40v-28m0 0v28h40v-28" fill="#fff0dc" stroke="#7b5963" stroke-width="3"/>
+  <rect x="124" y="165" width="68" height="54" rx="7" fill="#cbe9ed" stroke="#765d61" stroke-width="5"/>
+  <rect x="228" y="165" width="68" height="54" rx="7" fill="#cbe9ed" stroke="#765d61" stroke-width="5"/>
+  <rect x="196" y="168" width="28" height="72" rx="13" fill="#c96f7b"/>
+  <path d="M136 195q20-25 42 0M240 195q20-25 42 0" fill="none" stroke="#f5c46c" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="152" cy="183" r="8" fill="#e68dac"/><circle cx="265" cy="182" r="8" fill="#8ebc91"/>
+</g>
+<rect x="103" y="258" width="214" height="30" rx="15" fill="#fff4d4" stroke="#756047" stroke-width="4"/>
+<text x="210" y="278" text-anchor="middle" font-family="Georgia,serif" font-size="18" font-weight="700" fill="#5d4c3b">MARKET LANE</text>
+<circle cx="36" cy="40" r="16" fill="#fff7c5" opacity=".9"/><circle cx="63" cy="36" r="8" fill="#fff" opacity=".65"/>
+</svg>
