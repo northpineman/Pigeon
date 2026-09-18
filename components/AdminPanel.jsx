@@ -94,28 +94,28 @@ export default function AdminPanel({ config, onClose, onSave, saving }) {
 
         <div style={{ marginBottom: 18 }}>
           <div className="section-title">Exclusive seasonal Iggies</div>
-          {draft.seasonalBirds.map((b, idx) => (
+          {draft.seasonalIggies.map((b, idx) => (
             <div className="admin-row" key={b.key} style={{ flexWrap: "wrap" }}>
-              <input type="text" value={b.name} onChange={(e) => updateListItem("seasonalBirds", idx, "name", e.target.value)} style={{ flex: "1 1 100%", marginBottom: 4 }} />
-              <select value={b.speciesKey} onChange={(e) => updateListItem("seasonalBirds", idx, "speciesKey", e.target.value)}>
+              <input type="text" value={b.name} onChange={(e) => updateListItem("seasonalIggies", idx, "name", e.target.value)} style={{ flex: "1 1 100%", marginBottom: 4 }} />
+              <select value={b.speciesKey} onChange={(e) => updateListItem("seasonalIggies", idx, "speciesKey", e.target.value)}>
                 {Object.keys(SPECIES).map((k) => (
                   <option key={k} value={k}>{SPECIES[k].name}</option>
                 ))}
               </select>
-              <select value={b.colorKey} onChange={(e) => updateListItem("seasonalBirds", idx, "colorKey", e.target.value)}>
+              <select value={b.colorKey} onChange={(e) => updateListItem("seasonalIggies", idx, "colorKey", e.target.value)}>
                 {Object.keys(COLOR_HEX).map((k) => (
                   <option key={k} value={k}>{k}</option>
                 ))}
               </select>
-              <select value={b.season} onChange={(e) => updateListItem("seasonalBirds", idx, "season", e.target.value)}>
+              <select value={b.season} onChange={(e) => updateListItem("seasonalIggies", idx, "season", e.target.value)}>
                 <option value="christmas">Christmas</option>
                 <option value="halloween">Halloween</option>
               </select>
-              <input type="number" value={b.cost} onChange={(e) => updateListItem("seasonalBirds", idx, "cost", Number(e.target.value))} style={{ width: 60 }} />
-              <button className="btn btn-ghost" onClick={() => removeListItem("seasonalBirds", idx)}>✕</button>
+              <input type="number" value={b.cost} onChange={(e) => updateListItem("seasonalIggies", idx, "cost", Number(e.target.value))} style={{ width: 60 }} />
+              <button className="btn btn-ghost" onClick={() => removeListItem("seasonalIggies", idx)}>✕</button>
             </div>
           ))}
-          <button className="btn btn-secondary" style={{ marginTop: 6 }} onClick={() => addListItem("seasonalBirds", { name: "New Iggy", speciesKey: "rock", colorKey: "slate", cost: 50, season: "christmas" })}>
+          <button className="btn btn-secondary" style={{ marginTop: 6 }} onClick={() => addListItem("seasonalIggies", { name: "New Iggy", speciesKey: "rock", colorKey: "slate", cost: 50, season: "christmas" })}>
             + Add Iggy
           </button>
         </div>
@@ -154,6 +154,29 @@ export default function AdminPanel({ config, onClose, onSave, saving }) {
           >
             + Add pack
           </button>
+        </div>
+
+        <div style={{ marginBottom: 18 }}>
+          <div className="section-title">🦴 Real-money Special Dog Bone packs</div>
+          <div style={{ fontSize: 11, color: "var(--ink-soft)", marginBottom: 8 }}>
+            Special Bones are deterministic speed-ups only. Keep these clearly labeled as grown-up purchases and never turn them into randomized rewards.
+          </div>
+          {(draft.bonePacks || []).map((p, idx) => (
+            <div className="admin-row" key={p.key}>
+              <input type="text" value={p.emoji} onChange={(e) => updateListItem("bonePacks", idx, "emoji", e.target.value)} style={{ width: 44, textAlign: "center" }} />
+              <input type="text" value={p.name} onChange={(e) => updateListItem("bonePacks", idx, "name", e.target.value)} style={{ flex: 1, minWidth: 90 }} />
+              <input type="number" value={p.bones} onChange={(e) => updateListItem("bonePacks", idx, "bones", Number(e.target.value))} style={{ width: 64 }} title="bones granted" />
+              <input type="number" step="0.01" value={(p.priceCents / 100).toFixed(2)} onChange={(e) => updateListItem("bonePacks", idx, "priceCents", Math.round(Number(e.target.value) * 100))} style={{ width: 64 }} title="price in USD" />
+              <button className="btn btn-ghost" onClick={() => removeListItem("bonePacks", idx)}>✕</button>
+            </div>
+          ))}
+          <button className="btn btn-secondary" style={{ marginTop: 6 }} onClick={() => addListItem("bonePacks", { name: "New Bone Pack", bones: 5, priceCents: 199, emoji: "🦴" })}>
+            + Add bone pack
+          </button>
+        </div>
+
+        <div className="profile-note" style={{ marginBottom: 18 }}>
+          🐕 Kennel maximum is fixed at 14 Iggies. This is a game rule, not an admin-editable economy setting.
         </div>
 
         <div style={{ display: "flex", gap: 8, marginTop: 10, marginBottom: 30 }}>

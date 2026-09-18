@@ -1,0 +1,16 @@
+IGGY MEADOW v95 — BOTANICAL FINISH
+
+1. Extract this ZIP into a NEW, clean folder. Keep your working v94 folder.
+2. Copy your working .env.local into the extracted iggy-meadow-v95 folder.
+3. Double-click BUILD-V95.bat.
+4. When the build succeeds, double-click START-V95.bat.
+5. Open http://localhost:3000 and keep the server window open.
+
+Use your existing Supabase project. No new migration is required.
+Do not reset the database or use Reset progress to apply this update.
+The 14-Iggy maximum, Special Dog Bones, and existing saves are preserved.
+
+Source package: rebuild with your own configuration.
+Build verified here on Node 24.19.0; Node 20 is not required.
+Live accounts/payments/deployment still require checks in your environment.
+See V95-RELEASE-NOTES.md for changes and validation details.

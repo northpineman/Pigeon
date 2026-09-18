@@ -1,14 +1,20 @@
 "use client";
 import { useId } from "react";
 import { SPECIES, COLOR_HEX, SPECIAL_OVERLAY } from "@/lib/gameData";
+import { getEyeColor, getEyeStyle, normalizeAppearance } from "@/lib/appearance";
 
-export default function PetSVG({ speciesKey, colorKey, stage, outfitKey = null, wardrobeSlots = null, size = 76 }) {
+export default function PetSVG({ speciesKey, colorKey, stage, outfitKey = null, wardrobeSlots = null, appearance = null, size = 76 }) {
   const sp = SPECIES[speciesKey] || SPECIES.rock;
   const col = COLOR_HEX[colorKey] || COLOR_HEX.slate;
   const reactId = useId().replace(/:/g, "");
   const slots = wardrobeSlots || (outfitKey ? { body: outfitKey } : {});
   const equipped = new Set(Object.values(slots).filter(Boolean));
+  const face = normalizeAppearance({ appearance });
+  const eyeColor = getEyeColor(face.eyeColor);
+  const eyeStyle = getEyeStyle(face.eyeStyle);
   const gradId = `bg-${reactId}`;
+  const coatId = `coat-${reactId}`;
+  const shadowId = `shadow-${reactId}`;
 
   const shadingDefs = (
     <defs>
@@ -16,6 +22,15 @@ export default function PetSVG({ speciesKey, colorKey, stage, outfitKey = null, 
         <stop offset="0%" stopColor="#fff" stopOpacity="0.32" />
         <stop offset="55%" stopColor={col.base} stopOpacity="0" />
         <stop offset="100%" stopColor="#2B2534" stopOpacity="0.2" />
+      </radialGradient>
+      <linearGradient id={coatId} x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stopColor="#fff" stopOpacity="0.28" />
+        <stop offset="46%" stopColor={col.accent} stopOpacity="0.08" />
+        <stop offset="100%" stopColor="#1f1a24" stopOpacity="0.18" />
+      </linearGradient>
+      <radialGradient id={shadowId}>
+        <stop offset="0%" stopColor="#403843" stopOpacity="0.24" />
+        <stop offset="100%" stopColor="#403843" stopOpacity="0" />
       </radialGradient>
     </defs>
   );
@@ -49,6 +64,9 @@ export default function PetSVG({ speciesKey, colorKey, stage, outfitKey = null, 
     <svg viewBox="0 0 100 100" width={size} height={size}>
       {shadingDefs}
 
+      {/* soft contact shadow makes the Iggy feel grounded in illustrated scenes */}
+      <ellipse cx="53" cy="89" rx={isBaby ? 25 : 31} ry={isBaby ? 4.6 : 5.3} fill={`url(#${shadowId})`} />
+
       {/* thin whip tail, curving up from the rear */}
       <path
         d={`M ${cx + bodyLen * 0.85} ${cy + 2} Q ${cx + bodyLen * 1.25} ${cy - 4} ${cx + bodyLen * 1.15} ${cy - bodyH * 1.6}`}
@@ -63,6 +81,9 @@ export default function PetSVG({ speciesKey, colorKey, stage, outfitKey = null, 
       <rect x={cx - bodyLen * 0.35} y={cy + bodyH * 0.5} width={3 * s} height={legLen * 0.92} rx={1.5 * s} fill="#3D3648" opacity="0.15" />
       <rect x={cx + bodyLen * 0.25} y={cy + bodyH * 0.5} width={3 * s} height={legLen * 0.92} rx={1.5 * s} fill="#3D3648" opacity="0.15" />
       <rect x={cx + bodyLen * 0.5} y={cy + bodyH * 0.4} width={3 * s} height={legLen} rx={1.5 * s} fill={col.wing} />
+      <g fill={col.wing} stroke="#3D3648" strokeWidth="0.45" opacity="0.96">
+        <ellipse cx={cx - bodyLen * 0.60} cy={cy + bodyH * 0.4 + legLen + 1.2*s} rx={2.8*s} ry={1.25*s}/><ellipse cx={cx - bodyLen * 0.30} cy={cy + bodyH * 0.5 + legLen * 0.92 + 1.2*s} rx={2.6*s} ry={1.15*s}/><ellipse cx={cx + bodyLen * 0.30} cy={cy + bodyH * 0.5 + legLen * 0.92 + 1.2*s} rx={2.6*s} ry={1.15*s}/><ellipse cx={cx + bodyLen * 0.55} cy={cy + bodyH * 0.4 + legLen + 1.2*s} rx={2.8*s} ry={1.25*s}/>
+      </g>
 
       {/* body: deep chest, tucked waist, arched back */}
       <path
@@ -102,6 +123,8 @@ export default function PetSVG({ speciesKey, colorKey, stage, outfitKey = null, 
             Z`}
         fill={`url(#${gradId})`}
       />
+      <path d={`M ${cx-bodyLen*.78} ${cy-bodyH*.45} C ${cx-bodyLen*.45} ${cy-bodyH*1.18}, ${cx+bodyLen*.08} ${cy-bodyH*1.22}, ${cx+bodyLen*.55} ${cy-bodyH*.55}`} fill="none" stroke={`url(#${coatId})`} strokeWidth={3.5*s} strokeLinecap="round" opacity=".7"/>
+      <path d={`M ${cx-bodyLen*.83} ${cy-bodyH*.05} Q ${cx-bodyLen*.72} ${cy+bodyH*.7} ${cx-bodyLen*.43} ${cy+bodyH*.78}`} fill="none" stroke={col.accent} strokeWidth={2.1*s} strokeLinecap="round" opacity=".32"/>
       {SPECIAL_OVERLAY[colorKey] && (
         <ellipse cx={cx} cy={cy} rx={bodyLen * 0.6} ry={bodyH * 0.7} fill={SPECIAL_OVERLAY[colorKey].color} opacity={SPECIAL_OVERLAY[colorKey].opacity} />
       )}
@@ -146,10 +169,23 @@ export default function PetSVG({ speciesKey, colorKey, stage, outfitKey = null, 
       {/* small folded "rose" ears */}
       <path d={`M ${headCx + headLen * 0.2} ${headCy - headH * 0.8} q ${5 * s} ${-2 * s} ${4 * s} ${6 * s} q ${-4 * s} ${1 * s} ${-6 * s} ${-3 * s} Z`} fill={col.wing} stroke="#3D3648" strokeWidth="0.9" />
       <path d={`M ${headCx + headLen * 0.55} ${headCy - headH * 0.5} q ${5 * s} ${-1 * s} ${5 * s} ${6 * s} q ${-4 * s} ${1 * s} ${-6 * s} ${-4 * s} Z`} fill={col.wing} stroke="#3D3648" strokeWidth="0.9" />
+      <path d={`M ${headCx + headLen*.24} ${headCy-headH*.68} q ${2.5*s} ${-.7*s} ${2.4*s} ${2.6*s}`} fill="none" stroke={col.accent} strokeWidth={1.05*s} strokeLinecap="round" opacity=".65"/>
+      <path d={`M ${headCx + headLen*.56} ${headCy-headH*.37} q ${2.4*s} ${-.4*s} ${2.5*s} ${2.5*s}`} fill="none" stroke={col.accent} strokeWidth={1.05*s} strokeLinecap="round" opacity=".65"/>
+      <ellipse cx={headCx-headLen*.88} cy={headCy+headH*.16} rx={headLen*.34} ry={headH*.26} fill={col.accent} opacity=".18"/>
+      <path d={`M ${headCx-headLen*1.06} ${headCy+headH*.2} Q ${headCx-headLen*.85} ${headCy+headH*.34} ${headCx-headLen*.62} ${headCy+headH*.19}`} fill="none" stroke="#493f48" strokeWidth={.65*s} strokeLinecap="round" opacity=".7"/>
 
-      {/* eye */}
-      <circle cx={headCx - headLen * 0.15} cy={headCy - headH * 0.15} r={1.9 * s} fill="#2B2730" />
+      {/* personalized eyes: shape, color, and highlight are separate from the outfit */}
+      {eyeStyle.key === "almond" ? (
+        <path d={`M ${headCx - headLen * 0.95} ${headCy - headH * 0.15} Q ${headCx - headLen * 0.18} ${headCy - headH * 0.95} ${headCx + headLen * 0.42} ${headCy - headH * 0.12} Q ${headCx - headLen * 0.18} ${headCy + headH * 0.6} ${headCx - headLen * 0.95} ${headCy - headH * 0.15} Z`} fill={eyeColor.color} stroke="#3D3648" strokeWidth="0.75" />
+      ) : (
+        <circle cx={headCx - headLen * 0.15} cy={headCy - headH * 0.15} r={(eyeStyle.key === "dreamy" ? 1.65 : 1.9) * s} fill={eyeColor.color} stroke="#3D3648" strokeWidth="0.45" />
+      )}
       <circle cx={headCx - headLen * 0.05} cy={headCy - headH * 0.35} r={0.8 * s} fill="#fff" />
+      {eyeStyle.key === "sparkle" && <path d={`M ${headCx - headLen * 0.02} ${headCy - headH * 0.65} l ${0.8*s} ${1.5*s} l ${1.5*s} ${0.8*s} l-${1.5*s} ${0.8*s} l-${0.8*s} ${1.5*s} l-${0.8*s} ${-1.5*s} l-${1.5*s} ${-0.8*s} l ${1.5*s} ${-0.8*s} Z`} fill="#fff" opacity=".9" />}
+      {eyeStyle.key === "starlit" && <path d={`M ${headCx + headLen * 0.15} ${headCy - headH * 0.7} l ${0.8*s} ${1.6*s} l ${1.7*s} ${0.8*s} l-${1.7*s} ${0.8*s} l-${0.8*s} ${1.6*s} l-${0.8*s} ${-1.6*s} l-${1.7*s} ${-0.8*s} l ${1.7*s} ${-0.8*s} Z`} fill="#FFF1A8" />}
+      {eyeStyle.key === "heart" && <path d={`M ${headCx + headLen * 0.08} ${headCy - headH * 0.35} C ${headCx - headLen * 0.2} ${headCy - headH * 0.85}, ${headCx - headLen * 0.7} ${headCy - headH * 0.2}, ${headCx + headLen * 0.08} ${headCy + headH * 0.35} C ${headCx + headLen * 0.86} ${headCy - headH * 0.2}, ${headCx + headLen * 0.36} ${headCy - headH * 0.85}, ${headCx + headLen * 0.08} ${headCy - headH * 0.35} Z`} fill="#E98AA8" opacity=".9" />}
+      {eyeStyle.key === "dreamy" && <path d={`M ${headCx - headLen * 0.65} ${headCy + headH * 0.35} Q ${headCx - headLen * 0.15} ${headCy + headH * 0.7} ${headCx + headLen * 0.35} ${headCy + headH * 0.3}`} fill="none" stroke={eyeColor.color} strokeWidth={0.7 * s} strokeLinecap="round" />}
+      {eyeStyle.key === "mystic" && <circle cx={headCx - headLen * 0.15} cy={headCy - headH * 0.15} r={3.2*s} fill="none" stroke={eyeColor.color} strokeWidth={0.65*s} opacity=".8" />}
       {equipped.has("ribbon") && (
         <>
           <path d="M 38 47 Q 50 52 62 47" fill="none" stroke="#D85A88" strokeWidth="3.2" strokeLinecap="round" />

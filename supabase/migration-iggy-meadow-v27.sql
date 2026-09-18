@@ -1,0 +1,4 @@
+-- Iggy Meadow v27 — Guardian Bond
+-- No database schema changes are required.
+-- Bond XP and bond milestone journal entries are stored additively inside each pet
+-- object in the existing player_saves.birds JSONB payload for backward compatibility.

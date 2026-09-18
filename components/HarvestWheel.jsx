@@ -45,8 +45,8 @@ export default function HarvestWheel({ prizes, cost, seeds, onResult }) {
   };
 
   return (
-    <div style={{ textAlign: "center" }}>
-      <div style={{ position: "relative", width: 260, height: 260, margin: "0 auto" }}>
+    <div className="compact-harvest-wheel" style={{ textAlign: "center" }}>
+      <div className="compact-wheel-face" style={{ position: "relative", width: 180, height: 180, margin: "0 auto" }}>
         <div
           style={{
             position: "absolute",
@@ -64,8 +64,8 @@ export default function HarvestWheel({ prizes, cost, seeds, onResult }) {
         <div
           ref={wheelRef}
           style={{
-            width: 260,
-            height: 260,
+            width: 180,
+            height: 180,
             borderRadius: "50%",
             border: "4px solid var(--frame)",
             boxShadow: "3px 3px 0 rgba(91,70,54,0.2)",
