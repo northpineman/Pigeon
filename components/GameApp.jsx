@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import { loadPlayerSave } from "@/lib/loadPlayerSave.mjs";
 import PetArt from "./PetArt";
 import PremiumScene from "./PremiumScene";
 import MeadowMasthead from "./MeadowMasthead";
@@ -57,6 +58,8 @@ import { MEADOW_PROMISES, meadowGuideStep } from "@/lib/meadowGuide";
 export default function GameApp({ user, profile, onSignOut }) {
   const paymentsEnabled = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === "true";
   const [loaded, setLoaded] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [config, setConfig] = useState(DEFAULT_CONFIG);
   const [now, setNow] = useState(Date.now());
 
@@ -143,7 +146,11 @@ export default function GameApp({ user, profile, onSignOut }) {
 
   /* ---- initial load ---- */
   useEffect(() => {
+    let cancelled = false;
+    setLoaded(false);
+    setLoadError(false);
     (async () => {
+      try {
       const { data: cfgRow } = await supabase.from("game_config").select("config").eq("id", 1).single();
       setConfig(cfgRow?.config ? { ...DEFAULT_CONFIG, ...cfgRow.config } : DEFAULT_CONFIG);
 
@@ -156,28 +163,18 @@ export default function GameApp({ user, profile, onSignOut }) {
       const { data: premiumWallet } = await supabase.from("premium_wallets").select("bones").eq("user_id", user.id).maybeSingle();
       setBones(premiumWallet?.bones ?? 0);
 
-      let { data: save, error: saveErr } = await supabase.from("player_saves").select("*").eq("user_id", user.id).single();
-      if (saveErr || !save) {
-        const t = Date.now();
-        const starter = defaultBirds();
-        const { data: inserted } = await supabase
-          .from("player_saves")
-          .insert({
-            user_id: user.id,
+      const save = await loadPlayerSave(supabase, user.id, () => ({
             seeds: 30,
-            birds: starter,
+            birds: defaultBirds(),
             loft_capacity: LOFT_BASE_CAPACITY,
             upgrades_bought: 0,
             decorations: [],
-            last_collect_at: t,
+            last_collect_at: Date.now(),
             last_login_date: null,
             streak: 0,
             flags: {},
-          })
-          .select()
-          .single();
-        save = inserted;
-      }
+          }));
+      if (cancelled) return;
       if (save) {
         setSeeds(save.seeds ?? 30);
         const loadedPets = save.birds && save.birds.length ? save.birds : defaultBirds();
@@ -202,8 +199,13 @@ export default function GameApp({ user, profile, onSignOut }) {
         setWoodsState(loadedFlags.whisperingWoods || { discoveries: [], journal: [], visits: [], steps: 0, lastExploreAt: null });
       }
       setLoaded(true);
+      } catch (error) {
+        console.error("Could not load player save", error?.code || "connection_error");
+        if (!cancelled) setLoadError(true);
+      }
     })();
-  }, [user.id]);
+    return () => { cancelled = true; };
+  }, [user.id, loadAttempt]);
 
   /* ---- daily login check ---- */
   useEffect(() => {
@@ -803,6 +805,17 @@ export default function GameApp({ user, profile, onSignOut }) {
   };
 
   const selectedBird = pets.find((b) => b.id === selectedBirdId) || null;
+
+  if (loadError) {
+    return (
+      <div className="page"><div className="auth-card" role="alert">
+        <h2>Your kennel couldn’t load</h2>
+        <p>We haven’t changed your saved progress. Check your connection and try again.</p>
+        <button className="btn btn-primary" onClick={() => setLoadAttempt((n) => n + 1)}>Try again</button>
+        <button className="btn btn-ghost" onClick={onSignOut}>Sign out</button>
+      </div></div>
+    );
+  }
 
   if (!loaded) {
     return (
