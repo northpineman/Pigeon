@@ -6,11 +6,11 @@ import { getLife, getMaxLife, getStrength, getWisdom } from "@/lib/gameData";
 
 const FLAVOR = [
   "The path winds quietly ahead.",
-  "Iggies scamper somewhere in the meadow.",
+  "A pair of butterflies bob over the clover.",
   "A gentle breeze rustles the tall grass.",
-  "The trail forks, but you press onward.",
+  "The trail forks beside an old mossy signpost.",
   "Sunlight filters through the leaves overhead.",
-  "You spot old paw prints in the dirt.",
+  "You spot old paw prints in the soft dirt.",
 ];
 
 export default function Explore({ birds, bots, exploreStage, explorerId, onSelectExplorer, onBattle, potions, books, onUseItem }) {
@@ -26,175 +26,51 @@ export default function Explore({ birds, bots, exploreStage, explorerId, onSelec
   const bot = bots[Math.min(exploreStage, bots.length - 1)];
   const petLife = pet ? getLife(pet) : 0;
   const canAct = pet && petLife > 0 && !battling;
-
-  const walkerPct = 10 + (step % 8) * 11;
+  const walkerPct = 12 + (step % 7) * 12;
 
   const exploreForward = () => {
     if (!canAct || encounter) return;
-    setLastResult(null);
-    const next = step + 1;
-    setStep(next);
+    setLastResult(null); const next = step + 1; setStep(next);
     const rollEncounter = !allDefeated && Math.random() < 0.55;
-    if (rollEncounter) {
-      sfx.tick();
-      setFlavor(null);
-      setEncounter(bot);
-    } else {
-      setFlavor(FLAVOR[Math.floor(Math.random() * FLAVOR.length)]);
-      setEncounter(null);
-    }
+    if (rollEncounter) { sfx.tick(); setFlavor(null); setEncounter(bot); }
+    else { setFlavor(FLAVOR[Math.floor(Math.random() * FLAVOR.length)]); setEncounter(null); }
   };
 
   const fight = () => {
     if (!canAct || !encounter) return;
     setBattling(true);
-    setTimeout(() => {
-      const result = onBattle(pet.id);
-      setLastResult(result);
-      setEncounter(null);
-      setBattling(false);
-    }, 700);
+    setTimeout(() => { const result = onBattle(pet.id); setLastResult(result); setEncounter(null); setBattling(false); }, 700);
   };
+  const flee = () => { setEncounter(null); setFlavor("You tuck back behind the wildflowers and continue by a quieter path."); };
 
-  const flee = () => {
-    setEncounter(null);
-    setFlavor("You slip quietly back into the tall grass, avoiding the fight.");
-  };
-
-  return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-        <div className="section-title" style={{ margin: 0, border: "none", padding: 0 }}>Exploring</div>
-        <button className="btn btn-ghost" style={{ fontSize: 11.5, padding: "6px 10px" }} onClick={() => setShowPicker((s) => !s)}>
-          {pet ? `Exploring as ${pet.name}` : "Choose explorer"} ▾
-        </button>
-      </div>
-
-      {showPicker && (
-        <div className="loft-grid" style={{ marginBottom: 16 }}>
-          {birds.filter((b) => b.stage !== "egg").map((b) => (
-            <div
-              key={b.id}
-              className={`pet-card ${b.id === explorerId ? "busy" : ""}`}
-              onClick={() => {
-                onSelectExplorer(b.id);
-                setShowPicker(false);
-              }}
-            >
-              <PetArt speciesKey={b.speciesKey} colorKey={b.colorKey} stage={b.stage} size={50} />
-              <div className="bname">{b.name}</div>
-              <div className="statbar"><div className="statbar-fill" style={{ width: `${getLife(b)}%`, background: getLife(b) > 30 ? "#4CAF7D" : "#FF7A59" }} /></div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {pet && (
-        <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
-          <div className="pill">❤️ {getLife(pet)}/{getMaxLife(pet)}</div>
-          <div className="pill">💪 {getStrength(pet)}</div>
-          <div className="pill">📖 {getWisdom(pet)}</div>
-          <button className="pill" disabled={potions <= 0} onClick={() => onUseItem(pet.id, "strength")}>💪 Use ({potions})</button>
-          <button className="pill" disabled={books <= 0} onClick={() => onUseItem(pet.id, "wisdom")}>📖 Use ({books})</button>
-        </div>
-      )}
-
-      {/* the 2D scene */}
-      <div
-        style={{
-          position: "relative",
-          height: 220,
-          borderRadius: 16,
-          border: "3px solid var(--frame)",
-          boxShadow: "4px 4px 0 rgba(91,70,54,0.15)",
-          overflow: "hidden",
-          background: "linear-gradient(180deg, #E9D9F2 0%, #DCEFE4 55%, #C9DEB0 100%)",
-        }}
-      >
-        {/* distant trees */}
-        {[8, 24, 62, 80, 92].map((x, i) => (
-          <div key={i} style={{ position: "absolute", left: `${x}%`, bottom: 70, fontSize: 26, opacity: 0.55 }}>🌳</div>
-        ))}
-        {/* dirt path */}
-        <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 70, background: "#D8C09A", borderTop: "3px dashed #b89a6c" }} />
-
-        {/* the walker */}
-        {pet && (
-          <div style={{ position: "absolute", left: `${walkerPct}%`, bottom: 20, transition: "left 0.5s ease", transform: "translateX(-50%)" }}>
-            <PetArt speciesKey={pet.speciesKey} colorKey={pet.colorKey} stage={pet.stage} size={54} />
-          </div>
-        )}
-
-        {/* encounter */}
-        {encounter && (
-          <div style={{ position: "absolute", right: "8%", bottom: 24, textAlign: "center" }}>
-            <div style={{ fontSize: 46, animation: "bob 1s ease-in-out infinite" }}>{encounter.emoji}</div>
-            <div style={{ fontSize: 10.5, fontWeight: 800, background: "#fff", borderRadius: 8, padding: "2px 6px" }}>{encounter.name}</div>
-          </div>
-        )}
-
-        {!pet && (
-          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, color: "var(--ink-soft)", background: "rgba(255,255,255,0.6)" }}>
-            Choose an explorer above to begin
-          </div>
-        )}
-      </div>
-
-      {/* status / controls */}
-      <div style={{ marginTop: 14, textAlign: "center" }}>
-        {petLife <= 0 && pet && (
-          <div style={{ fontSize: 12.5, color: "var(--warm)", fontWeight: 700, marginBottom: 10 }}>
-            {pet.name} is out of life — feed them from the Kennel to keep exploring.
-          </div>
-        )}
-
-        {encounter ? (
-          <>
-            <div style={{ fontFamily: "'Fraunces', serif", fontSize: 15, marginBottom: 10 }}>A wild {encounter.name} appears!</div>
-            <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
-              <button className="btn btn-primary" onClick={fight} disabled={!canAct || battling}>
-                {battling ? "Battling…" : "Fight!"}
-              </button>
-              <button className="btn btn-ghost" onClick={flee} disabled={battling}>
-                Flee
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            {flavor && <div style={{ fontSize: 13, color: "var(--ink-soft)", marginBottom: 10 }}>{flavor}</div>}
-            <button className="btn btn-primary" onClick={exploreForward} disabled={!canAct}>
-              {allDefeated ? "Wander further →" : "Explore forward →"}
-            </button>
-          </>
-        )}
-
-        {lastResult && (
-          <div
-            style={{
-              marginTop: 12,
-              padding: "10px 14px",
-              borderRadius: 12,
-              background: lastResult.won ? "#4CAF7D22" : "#FF7A5922",
-              fontSize: 13,
-              fontWeight: 600,
-            }}
-          >
-            {lastResult.won ? "🎉 " : "💥 "}
-            {lastResult.message}
-          </div>
-        )}
-      </div>
-
-      <div style={{ marginTop: 16, fontSize: 11.5, color: "var(--ink-soft)", textAlign: "center" }}>
-        {allDefeated
-          ? "You've cleared every challenger so far — more are on the way."
-          : `Gauntlet progress: ${exploreStage}/${bots.length} defeated`}
-      </div>
-
-      <style>{`
-        @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
-      `}</style>
+  return <div className="explore-page-v30">
+    <div className="explore-toolbar-v30">
+      <div><div className="eyebrow">TRAIL JOURNAL · STOP {step + 1}</div><div className="section-title">The Wandering Path</div></div>
+      <label className="compact-explorer-select">Your explorer <select aria-label="Choose explorer" value={pet?.id || ""} onChange={(e) => onSelectExplorer(e.target.value)}>{birds.filter((b) => b.stage !== "egg").map((b) => <option key={b.id} value={b.id}>{b.name || "Unnamed Iggy"}</option>)}</select></label>
     </div>
-  );
+
+    <div className="explore-status-row">
+      {pet && <><span>💗 Energy {getLife(pet)}/{getMaxLife(pet)}</span><span>💪 Courage {getStrength(pet)}</span><span>📖 Wisdom {getWisdom(pet)}</span><button disabled={potions <= 0} onClick={() => onUseItem(pet.id, "strength")}>🍯 Treat ×{potions}</button><button disabled={books <= 0} onClick={() => onUseItem(pet.id, "wisdom")}>📚 Storybook ×{books}</button></>}
+    </div>
+
+    <section className="wandering-scene-v30">
+      <div className="trail-sky"/><div className="trail-sun"/><div className="trail-hill trail-hill-a"/><div className="trail-hill trail-hill-b"/>
+      <div className="trail-tree tr1">♣</div><div className="trail-tree tr2">♣</div><div className="trail-tree tr3">♣</div><div className="trail-tree tr4">♣</div>
+      <div className="trail-path"/><div className="trail-flowers f1">❀ ✿ ❀</div><div className="trail-flowers f2">✿ ❀ ✿</div><div className="trail-sign">WHISPERING WOODS<br/>← &nbsp; MEADOW &nbsp; →</div>
+      {pet && <div className="trail-walker" style={{ left: `${walkerPct}%` }}><div className="walker-shadow"/><PetArt speciesKey={pet.speciesKey} colorKey={pet.colorKey} stage={pet.stage} outfitKey={pet.outfitKey || null} appearance={pet.appearance} size={88}/><span>{pet.name}</span></div>}
+      {encounter && <div className="trail-encounter"><div className="encounter-glow"/><div className="encounter-emoji">{encounter.emoji}</div><strong>{encounter.name}</strong><small>A curious trail challenge</small></div>}
+      {!pet && <div className="trail-empty">🐕<strong>Choose an Iggy to walk the path.</strong><span>No rush — the trail will wait.</span></div>}
+    </section>
+
+    <section className="trail-story-card">
+      <div className="trail-story-seal">✦</div>
+      <div className="trail-story-copy">
+        {petLife <= 0 && pet ? <><strong>{pet.name} is ready for a cozy break.</strong><p>A snack and a little care back at the kennel will have them eager for another walk.</p></> : encounter ? <><strong>A {encounter.name} blocks the path!</strong><p>You can try a friendly challenge or simply choose another route. Either choice is okay.</p></> : <><strong>{flavor || "The meadow road is open."}</strong><p>{allDefeated ? "You've met every trail challenger for now. Wander as long as you like." : "Take another step when you're ready. There is always another little detail to notice."}</p></>}
+      </div>
+      <div className="trail-actions">{encounter ? <><button className="btn btn-primary" onClick={fight} disabled={!canAct || battling}>{battling ? "Trying…" : "Try the challenge"}</button><button className="btn btn-ghost" onClick={flee} disabled={battling}>Take another path</button></> : <button className="btn btn-primary" onClick={exploreForward} disabled={!canAct}>{allDefeated ? "Wander farther →" : "Follow the path →"}</button>}</div>
+    </section>
+
+    {lastResult && <div className={`trail-result ${lastResult.won ? "won" : "rest"}`}>{lastResult.won ? "✨ " : "🌿 "}{lastResult.message}</div>}
+    <div className="trail-progress"><span style={{ width: `${Math.min(100, (exploreStage / Math.max(1,bots.length)) * 100)}%` }}/></div><small className="trail-progress-label">Trail challenge journal · {exploreStage}/{bots.length} discovered</small>
+  </div>;
 }

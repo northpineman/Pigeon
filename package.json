@@ -1,6 +1,6 @@
 {
-  "name": "pigeonsndoves",
-  "version": "1.0.0",
+  "name": "iggy-meadow",
+  "version": "9.6.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -8,11 +8,17 @@
     "start": "next start"
   },
   "dependencies": {
-    "next": "14.2.5",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "@supabase/supabase-js": "2.45.4",
+    "@supabase/supabase-js": "2.116.0",
+    "next": "15.5.25",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
     "stripe": "16.8.0",
     "web-push": "3.6.7"
+  },
+  "overrides": {
+    "postcss": "8.5.28"
+  },
+  "engines": {
+    "node": "24.x"
   }
 }

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="300" viewBox="0 0 420 300">
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe7f4"/><stop offset="1" stop-color="#f5e8bf"/></linearGradient>
+  <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fc982"/><stop offset="1" stop-color="#6e9f68"/></linearGradient>
+  <filter id="shadow"><feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#5c4632" flood-opacity=".25"/></filter>
+  <filter id="soft"><feGaussianBlur stdDeviation="6"/></filter>
+</defs>
+<rect width="420" height="300" rx="28" fill="url(#sky)"/>
+<path d="M0 205Q88 161 179 203T420 194V300H0Z" fill="url(#grass)"/>
+<ellipse cx="210" cy="250" rx="150" ry="25" fill="#4f6f46" opacity=".2"/>
+<g filter="url(#shadow)">
+  <path d="M104 142 L210 65 L316 142Z" fill="#9c6b63" stroke="#714c48" stroke-width="8"/>
+  <rect x="119" y="134" width="182" height="106" rx="18" fill="#f0d5c8" stroke="#7f5d53" stroke-width="7"/>
+  <circle cx="210" cy="112" r="28" fill="#fff4dd" stroke="#7f5d53" stroke-width="6"/>
+  <path d="M210 95c-20 0-26 18-15 28 7 6 15 11 15 11s8-5 15-11c11-10 5-28-15-28Z" fill="#d98f9d"/>
+  <rect x="184" y="174" width="52" height="66" rx="22" fill="#8f9f71" stroke="#65734f" stroke-width="6"/>
+  <rect x="139" y="164" width="32" height="36" rx="5" fill="#c9e7ef" stroke="#7f5d53" stroke-width="5"/>
+  <rect x="249" y="164" width="32" height="36" rx="5" fill="#c9e7ef" stroke="#7f5d53" stroke-width="5"/>
+  <path d="M128 245q27-30 51 0M244 246q30-33 56 0" fill="none" stroke="#83aa72" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="146" cy="220" r="8" fill="#eab3c4"/><circle cx="276" cy="219" r="8" fill="#efd173"/>
+</g>
+<rect x="103" y="258" width="214" height="30" rx="15" fill="#fff4d4" stroke="#756047" stroke-width="4"/>
+<text x="210" y="278" text-anchor="middle" font-family="Georgia,serif" font-size="18" font-weight="700" fill="#5d4c3b">ADOPTION HOUSE</text>
+<circle cx="36" cy="40" r="16" fill="#fff7c5" opacity=".9"/><circle cx="63" cy="36" r="8" fill="#fff" opacity=".65"/>
+</svg>

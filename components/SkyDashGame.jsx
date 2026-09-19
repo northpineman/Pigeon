@@ -14,7 +14,7 @@ export default function SkyDashGame({ onFinish, onClose, onPlayAgain }) {
     const ctx = canvas.getContext("2d");
     const W = canvas.width, H = canvas.height;
 
-    const bird = { x: 60, y: H / 2, r: 10, vy: 0 };
+    const iggy = { x: 60, y: H / 2, r: 10, vy: 0 };
     const gravity = 0.42;
     const flap = -6.6;
     const pipeW = 44;
@@ -35,7 +35,7 @@ export default function SkyDashGame({ onFinish, onClose, onPlayAgain }) {
     function onFlap(e) {
       if (e) e.preventDefault();
       if (done || countdown > 0) return;
-      bird.vy = flap;
+      iggy.vy = flap;
     }
     canvas.addEventListener("mousedown", onFlap);
     canvas.addEventListener("touchstart", onFlap, { passive: false });
@@ -74,7 +74,7 @@ export default function SkyDashGame({ onFinish, onClose, onPlayAgain }) {
       if (countdown > 0) {
         countdown--;
         ctx.save();
-        ctx.translate(bird.x, bird.y);
+        ctx.translate(iggy.x, iggy.y);
         ctx.fillStyle = "#8a6a4a";
         ctx.beginPath();
         ctx.ellipse(0, 1, 12, 8, 0, 0, Math.PI * 2);
@@ -95,8 +95,8 @@ export default function SkyDashGame({ onFinish, onClose, onPlayAgain }) {
       pipeSpeed = 2.6 + Math.min(2.4, localScore * 0.06);
       gapSize = Math.max(92, 128 - localScore * 1.2);
 
-      bird.vy += gravity;
-      bird.y += bird.vy;
+      iggy.vy += gravity;
+      iggy.y += iggy.vy;
 
       ctx.fillStyle = "#4CAF7D";
       pipes.forEach((p) => {
@@ -104,24 +104,24 @@ export default function SkyDashGame({ onFinish, onClose, onPlayAgain }) {
         ctx.fillRect(p.x, 0, pipeW, p.gapY);
         ctx.fillRect(p.x, p.gapY + gapSize, pipeW, H - (p.gapY + gapSize));
 
-        if (!p.passed && p.x + pipeW < bird.x) {
+        if (!p.passed && p.x + pipeW < iggy.x) {
           p.passed = true;
           localScore += 1;
           setScore(localScore);
           sfx.pop();
         }
 
-        const hitX = bird.x + bird.r > p.x && bird.x - bird.r < p.x + pipeW;
-        const hitY = bird.y - bird.r < p.gapY || bird.y + bird.r > p.gapY + gapSize;
+        const hitX = iggy.x + iggy.r > p.x && iggy.x - iggy.r < p.x + pipeW;
+        const hitY = iggy.y - iggy.r < p.gapY || iggy.y + iggy.r > p.gapY + gapSize;
         if (hitX && hitY && !done) { done = true; sfx.hit(); }
       });
       pipes = pipes.filter((p) => p.x > -pipeW);
 
-      if (bird.y - bird.r < 0 || bird.y + bird.r > H) done = true;
+      if (iggy.y - iggy.r < 0 || iggy.y + iggy.r > H) done = true;
 
       ctx.save();
-      ctx.translate(bird.x, bird.y);
-      ctx.rotate(Math.max(-0.35, Math.min(0.5, bird.vy * 0.05)));
+      ctx.translate(iggy.x, iggy.y);
+      ctx.rotate(Math.max(-0.35, Math.min(0.5, iggy.vy * 0.05)));
       ctx.fillStyle = "#8a6a4a";
       ctx.beginPath();
       ctx.ellipse(0, 1, 12, 8, 0, 0, Math.PI * 2);

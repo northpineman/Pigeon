@@ -1,0 +1,38 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> iggy-meadow@9.5.0 build
+> next build
+
+  ▲ Next.js 14.2.35
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/10) ...
+   Generating static pages (2/10) 
+   Generating static pages (4/10) 
+   Generating static pages (7/10) 
+ ✓ Generating static pages (10/10)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    65.9 kB         199 kB
+├ ○ /_not-found                          873 B          88.2 kB
+├ ƒ /api/cron/send-reminders             0 B                0 B
+├ ƒ /api/premium/use-bone                0 B                0 B
+├ ƒ /api/stripe/create-checkout-session  0 B                0 B
+├ ƒ /api/stripe/webhook                  0 B                0 B
+├ ○ /login                               1.41 kB         131 kB
+├ ƒ /profile/[username]                  1.88 kB         143 kB
+└ ○ /signup                              1.71 kB         131 kB
++ First Load JS shared by all            87.4 kB
+  ├ chunks/117-1668a1916a5daa65.js       31.7 kB
+  ├ chunks/fd9d1056-0513bfa1d30c24ee.js  53.6 kB
+  └ other shared chunks (total)          2 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

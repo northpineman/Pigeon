@@ -20,7 +20,7 @@ export default function WindRiderGame({ onFinish, onClose, onPlayAgain }) {
     const laneW = W / LANES;
     const laneX = (i) => laneW * i + laneW / 2;
 
-    const bird = { lane: 1, x: laneX(1), y: H - 48 };
+    const iggy = { lane: 1, x: laneX(1), y: H - 48 };
     let items = [];
     let frame = 0;
     let speed = 3.2;
@@ -32,8 +32,8 @@ export default function WindRiderGame({ onFinish, onClose, onPlayAgain }) {
       const rect = canvas.getBoundingClientRect();
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const x = (clientX - rect.left) * (W / rect.width);
-      if (x < W / 2) bird.lane = Math.max(0, bird.lane - 1);
-      else bird.lane = Math.min(LANES - 1, bird.lane + 1);
+      if (x < W / 2) iggy.lane = Math.max(0, iggy.lane - 1);
+      else iggy.lane = Math.min(LANES - 1, iggy.lane + 1);
     }
     canvas.addEventListener("mousedown", onTap);
     canvas.addEventListener("touchstart", onTap, { passive: true });
@@ -61,7 +61,7 @@ export default function WindRiderGame({ onFinish, onClose, onPlayAgain }) {
       speed = 3.2 + Math.min(3.5, localScore * 0.04);
       if (frame % Math.max(28, 55 - Math.floor(localScore / 2)) === 0) spawn();
 
-      bird.x += (laneX(bird.lane) - bird.x) * 0.28;
+      iggy.x += (laneX(iggy.lane) - iggy.x) * 0.28;
 
       items.forEach((it) => {
         it.y += speed;
@@ -69,8 +69,8 @@ export default function WindRiderGame({ onFinish, onClose, onPlayAgain }) {
         ctx.textAlign = "center";
         ctx.fillText(it.isSeed ? "🌾" : "⛈️", laneX(it.lane), it.y);
 
-        const closeY = Math.abs(it.y - bird.y) < 20;
-        const closeLane = it.lane === bird.lane;
+        const closeY = Math.abs(it.y - iggy.y) < 20;
+        const closeLane = it.lane === iggy.lane;
         if (!it.hit && closeY && closeLane) {
           it.hit = true;
           if (it.isSeed) {
@@ -94,7 +94,7 @@ export default function WindRiderGame({ onFinish, onClose, onPlayAgain }) {
 
       ctx.font = "26px sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("🐕", bird.x, bird.y);
+      ctx.fillText("🐕", iggy.x, iggy.y);
 
       if (done) {
         setStatus("lost");

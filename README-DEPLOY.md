@@ -1,10 +1,12 @@
 
-## Current build: v8 — Layered Meadow Closet
+## Current build: v96 — Short Pages Petsite
 
-# Deploying PigeonsnDoves
+For an existing working setup, start with `START-HERE-V96.md`. This version needs no database migration.
+
+# Deploying Iggy Meadow
 
 This is a real website: people can sign up with an email + password, keep their
-own loft, earn achievements, and see a leaderboard. It's built with **Next.js**
+own kennel, earn achievements, and see a leaderboard. It's built with **Next.js**
 (the website) and **Supabase** (accounts + database). Both have generous free
 tiers and you can set the whole thing up by clicking through their websites —
 no command line required.
@@ -16,7 +18,7 @@ Total time: about 20–30 minutes the first time.
 ## Part 1 — Create your database (Supabase)
 
 1. Go to **supabase.com** and sign up (free).
-2. Click **New project**. Pick any name (e.g. "pigeonsndoves"), set a database
+2. Click **New project**. Pick any name (e.g. "iggy-meadow"), set a database
    password (save it somewhere), pick a region close to you, and create it.
    Wait a minute or two for it to finish setting up.
 3. In the left sidebar, click the **SQL Editor** icon.
@@ -29,7 +31,7 @@ Total time: about 20–30 minutes the first time.
 7. In the left sidebar, go to **Project Settings -> API**. You'll need two
    values from this page in Part 3:
    - **Project URL**
-   - **anon public** key (under "Project API keys")
+   - **Publishable key** (the client-safe key; the app still stores it in `NEXT_PUBLIC_SUPABASE_ANON_KEY` for compatibility)
 
 ### Turn off email confirmation (optional, recommended for a small/friends site)
 
@@ -50,7 +52,7 @@ link to click first (Supabase sends this automatically, nothing to build).
 
 1. Go to **github.com** and sign up (free) if you don't have an account.
 2. Click the **+** in the top right -> **New repository**. Name it
-   `pigeonsndoves`, keep it **Public** or **Private** (either works), and
+   `iggy-meadow`, keep it **Public** or **Private** (either works), and
    click **Create repository**. Don't add a README — leave it empty.
 3. On the new repo's page, click **uploading an existing file**.
 4. Drag in every file and folder from this project (unzip it first on your
@@ -65,13 +67,13 @@ link to click first (Supabase sends this automatically, nothing to build).
 1. Go to **vercel.com** and sign up (free) — choose "Continue with GitHub" so
    the two are connected automatically.
 2. Click **Add New -> Project**.
-3. Find your `pigeonsndoves` repo in the list and click **Import**.
+3. Find your `iggy-meadow` repo in the list and click **Import**.
 4. Before clicking Deploy, open **Environment Variables** and add these two
    (from Part 1, step 7):
    - `NEXT_PUBLIC_SUPABASE_URL` = your Project URL
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = your anon public key
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = your Publishable key
 5. Click **Deploy**. Wait a minute or two — Vercel will build the site and
-   give you a live link like `pigeonsndoves.vercel.app`.
+   give you a live link like `iggy-meadow.vercel.app`.
 
 That link is your real, live website. Anyone can visit it, sign up, and play.
 
@@ -155,7 +157,7 @@ purchase.
 
 ## Part 6 — Push notifications
 
-Lets players opt in to a daily reminder ("your loft misses you!") even when
+Lets players opt in to a daily reminder ("your kennel misses you!") even when
 the site/tab isn't open.
 
 1. A working set of notification keys was already generated for you:
@@ -218,7 +220,7 @@ a minute or two of any change to the repo.
   a small personal or friends-and-family site. If it ever gets very popular,
   each has paid tiers you can upgrade to from their dashboards.
 - **Custom domain:** Vercel lets you attach your own domain name (e.g.
-  `pigeonsndoves.com`) for free under Project Settings -> Domains, if you buy
+  `iggy-meadow.com`) for free under Project Settings -> Domains, if you buy
   one from a registrar.
 - **Email sending:** Supabase sends confirmation/password-reset emails
   automatically using their own shared email service. For a small site this
@@ -227,3 +229,52 @@ a minute or two of any change to the repo.
 - **I can't click through these dashboards for you** — but if you get stuck
   or hit an error message at any step, copy/paste it back to me and I'll help
   you fix it.
+
+---
+
+## v35 — 14-Iggy maximum + Special Dog Bones
+
+If you are upgrading an existing Iggy Meadow Supabase project to v35, run
+`supabase/migration-iggy-meadow-v35.sql` once in the Supabase SQL Editor.
+Do **not** re-run the entire schema on an existing project.
+
+v35 makes 14 the permanent maximum number of Iggies a player can own. Kennel
+upgrades stop at 14, and the database enforces the same limit for new writes.
+
+v35 also adds optional real-money **Special Dog Bones**. One bone finishes one
+active Iggy timer (egg hatch, puppy growth, or breeding rest). Premium balances
+are kept in a separate server-owned wallet and cannot be edited directly by the
+browser. Bone purchases use the same Stripe environment variables and verified
+webhook already used for seed packs.
+
+The UI intentionally labels paid packs as grown-up purchases. Special Bones are
+not random rewards or loot boxes, and players can continue normal progression
+without purchasing them.
+
+
+---
+
+## v37 — Living Town + Private Iggy Rooms
+
+v37 is a visual-world expansion layered on top of the v36/v35 systems. It does
+not require a new database migration.
+
+Highlights:
+
+- Meadow Town Center is now a larger clickable classic pet-site map with six
+  destinations: Willow Kennels, Adoption House, Market Lane, Arcade Lane, the
+  Meadow Archive, and the Garden Gate.
+- Named town residents appear directly in the town scene and a new Townfolk
+  section gives recurring NPCs portraits, roles, dialogue, and destination links.
+- Each Iggy profile now has a **My Room** tab. The room visually uses that Iggy's
+  current appearance plus collected decorations and toys, turning the profile
+  into a place rather than only a data sheet.
+- The Great Meadow map now includes illustrated destination postcards for the
+  major open/seasonal districts, giving each region a stronger visual identity.
+- The Supabase example environment file now explains the newer Publishable-key
+  terminology while preserving the existing NEXT_PUBLIC_SUPABASE_ANON_KEY name
+  expected by the current codebase.
+
+The 14-Iggy ownership maximum and Special Dog Bone premium system from v35 are
+unchanged. v35's migration still needs to be run once before premium currency
+features are used against an existing Supabase project.

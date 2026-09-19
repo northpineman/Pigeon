@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 620" role="img" aria-label="Harvest Iggy room">
+<defs><linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f1dcc7"/><stop offset="1" stop-color="#ead0a9"/></linearGradient><linearGradient id="floor" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#b9825e"/><stop offset="1" stop-color="#c9a77f"/></linearGradient></defs>
+<rect width="1000" height="620" fill="url(#wall)"/><rect y="425" width="1000" height="195" fill="url(#floor)"/>
+<path d="M0 426 H1000" stroke="#7c624a" stroke-width="12"/>
+<g opacity=".2" fill="#b96f3d"><circle cx="95" cy="105" r="9"/><circle cx="215" cy="180" r="6"/><circle cx="810" cy="102" r="8"/><circle cx="900" cy="222" r="6"/><circle cx="720" cy="286" r="5"/></g>
+<rect x="82" y="86" width="270" height="218" rx="12" fill="#f9edd3" stroke="#765a42" stroke-width="12"/><rect x="105" y="108" width="224" height="173" rx="6" fill="#e4b06b"/><path d="M217 108 V281 M105 194 H329" stroke="#fff7e6" stroke-width="10"/>
+<path d="M106 280 Q162 223 219 279 Q271 223 329 280" fill="#b96f3d" opacity=".46"/>
+<rect x="692" y="88" width="212" height="148" rx="12" fill="#f9edd3" stroke="#765a42" stroke-width="10"/><text x="798" y="175" text-anchor="middle" font-size="88" fill="#b96f3d" opacity=".78">❦</text>
+<path d="M87 487 Q500 450 913 487 L880 590 H120Z" fill="#f4e2c0" stroke="#8b6a4c" stroke-width="8"/>
+<ellipse cx="500" cy="514" rx="250" ry="70" fill="#b96f3d" opacity=".14"/>
+<g fill="#fff7e9" stroke="#8b6a4c" stroke-width="6"><rect x="380" y="438" width="240" height="105" rx="35"/><rect x="405" y="452" width="88" height="53" rx="22"/><rect x="507" y="452" width="88" height="53" rx="22"/></g>
+<path d="M399 536 Q500 497 602 536" fill="none" stroke="#b96f3d" stroke-width="13" opacity=".7"/>
+<circle cx="112" cy="43" r="16" fill="#b96f3d" opacity=".54"/><circle cx="890" cy="48" r="12" fill="#b96f3d" opacity=".42"/>
+</svg>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="300" viewBox="0 0 420 300">
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe7f4"/><stop offset="1" stop-color="#f5e8bf"/></linearGradient>
+  <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9fc982"/><stop offset="1" stop-color="#6e9f68"/></linearGradient>
+  <filter id="shadow"><feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#5c4632" flood-opacity=".25"/></filter>
+  <filter id="soft"><feGaussianBlur stdDeviation="6"/></filter>
+</defs>
+<rect width="420" height="300" rx="28" fill="url(#sky)"/>
+<path d="M0 205Q88 161 179 203T420 194V300H0Z" fill="url(#grass)"/>
+<ellipse cx="210" cy="250" rx="150" ry="25" fill="#4f6f46" opacity=".2"/>
+<g filter="url(#shadow)">
+  <rect x="116" y="112" width="188" height="128" rx="8" fill="#d6c6a8" stroke="#665345" stroke-width="8"/>
+  <path d="M103 124h214L278 70H142Z" fill="#6d5c52" stroke="#4e423c" stroke-width="8"/>
+  <rect x="184" y="154" width="52" height="86" rx="4" fill="#8a765c" stroke="#5e4d3e" stroke-width="5"/>
+  <rect x="137" y="149" width="34" height="42" fill="#c7e1e8" stroke="#665345" stroke-width="5"/>
+  <rect x="249" y="149" width="34" height="42" fill="#c7e1e8" stroke="#665345" stroke-width="5"/>
+  <path d="M146 149v42M258 149v42M137 170h34M249 170h34" stroke="#fff3d5" stroke-width="3"/>
+  <path d="M210 99c-19 0-30 10-30 24 11-5 20-4 30 3 10-7 19-8 30-3 0-14-11-24-30-24Z" fill="#f0dfad" stroke="#6f5b49" stroke-width="4"/>
+  <path d="M210 99v27" stroke="#6f5b49" stroke-width="3"/>
+</g>
+<rect x="103" y="258" width="214" height="30" rx="15" fill="#fff4d4" stroke="#756047" stroke-width="4"/>
+<text x="210" y="278" text-anchor="middle" font-family="Georgia,serif" font-size="18" font-weight="700" fill="#5d4c3b">MEADOW ARCHIVE</text>
+<circle cx="36" cy="40" r="16" fill="#fff7c5" opacity=".9"/><circle cx="63" cy="36" r="8" fill="#fff" opacity=".65"/>
+</svg>

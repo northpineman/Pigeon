@@ -1,4 +1,6 @@
 import "./globals.css";
+import "./meadow-polish.css";
+import "./compact-meadow.css";
 
 export const metadata = {
   title: "Iggy Meadow",
@@ -16,15 +18,15 @@ export const metadata = {
 };
 
 export const viewport = {
-  themeColor: "#FF7A59",
+  themeColor: "#f2b9c8",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head><link rel="preload" as="image" href="/art/launch/meadow-plaza.webp" /></head>
       <body>
         {children}
         <script

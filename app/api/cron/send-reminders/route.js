@@ -28,8 +28,8 @@ export async function GET(req) {
   }
 
   const payload = JSON.stringify({
-    title: "🕊️ Your loft misses you",
-    body: "Seeds are piling up and your birds could use a visit. Come collect today's harvest!",
+    title: "🐕 Your kennel misses you",
+    body: "Seeds are piling up and your Iggies could use a visit. Come collect today's harvest!",
     url: "/",
   });
 

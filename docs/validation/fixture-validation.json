@@ -1,0 +1,112 @@
+{
+  "pages": [
+    {
+      "name": "home",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "name": "kennel",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "name": "iggy-profile",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "name": "adoption",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "name": "market",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "name": "wardrobe",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "name": "public-profile",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "name": "home",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "name": "kennel",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "name": "iggy-profile",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "name": "adoption",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "name": "market",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "name": "wardrobe",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "name": "public-profile",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "name": "home",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "name": "kennel",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "name": "iggy-profile",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "name": "adoption",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "name": "market",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "name": "wardrobe",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "name": "public-profile",
+      "width": 390,
+      "overflow": false
+    }
+  ],
+  "consoleErrors": [],
+  "assetFailures": [],
+  "saveCompatibility": true
+}

@@ -1,7 +1,7 @@
 // Minimal service worker: makes the site installable as an app and
 // listens for push notifications sent from the server.
 
-const CACHE_NAME = "pigeonsndoves-shell-v1";
+const CACHE_NAME = "iggy-meadow-shell-v2";
 const SHELL_URLS = ["/", "/manifest.json", "/icons/icon-192.png", "/icons/icon-512.png"];
 
 self.addEventListener("install", (event) => {
@@ -29,7 +29,7 @@ self.addEventListener("fetch", (event) => {
 });
 
 self.addEventListener("push", (event) => {
-  let payload = { title: "PigeonsnDoves", body: "Your loft is waiting for you!" };
+  let payload = { title: "Iggy Meadow", body: "Your kennel is waiting for you!" };
   try {
     if (event.data) payload = { ...payload, ...event.data.json() };
   } catch (e) {

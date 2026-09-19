@@ -27,34 +27,47 @@ export async function POST(req) {
     const session = event.data.object;
     const userId = session.metadata?.userId;
     const packKey = session.metadata?.packKey;
+    const packType = session.metadata?.packType === "bones" ? "bones" : "seeds";
 
     if (userId && packKey) {
       const supabaseAdmin = getSupabaseAdmin();
-
       const { data: cfgRow } = await supabaseAdmin.from("game_config").select("config").eq("id", 1).single();
       const config = cfgRow?.config ? { ...DEFAULT_CONFIG, ...cfgRow.config } : DEFAULT_CONFIG;
-      const pack = (config.seedPacks || []).find((p) => p.key === packKey);
+      const catalog = packType === "bones" ? (config.bonePacks || []) : (config.seedPacks || []);
+      const pack = catalog.find((p) => p.key === packKey);
 
       if (pack) {
-        // Idempotency: this insert has a unique constraint on stripe_session_id,
-        // so if Stripe retries the same webhook we won't double-credit seeds.
+        const seedsGranted = packType === "seeds" ? pack.seeds : 0;
+        const bonesGranted = packType === "bones" ? pack.bones : 0;
+
+        // Idempotency: stripe_session_id is unique, so Stripe retries cannot
+        // grant the same purchase twice.
         const { error: insertErr } = await supabaseAdmin.from("purchases").insert({
           user_id: userId,
           stripe_session_id: session.id,
           pack_key: pack.key,
-          seeds_granted: pack.seeds,
+          purchase_type: packType,
+          seeds_granted: seedsGranted,
+          bones_granted: bonesGranted,
           amount_cents: session.amount_total ?? pack.priceCents,
         });
 
         if (!insertErr) {
-          const { data: save } = await supabaseAdmin.from("player_saves").select("seeds").eq("user_id", userId).single();
-          const currentSeeds = save?.seeds ?? 0;
-          await supabaseAdmin
-            .from("player_saves")
-            .update({ seeds: currentSeeds + pack.seeds, updated_at: new Date().toISOString() })
-            .eq("user_id", userId);
+          if (packType === "bones") {
+            const { error: grantErr } = await supabaseAdmin.rpc("grant_special_dog_bones", {
+              p_user_id: userId,
+              p_amount: bonesGranted,
+            });
+            if (grantErr) console.error("bone grant failed", grantErr);
+          } else {
+            const { data: save } = await supabaseAdmin.from("player_saves").select("seeds").eq("user_id", userId).single();
+            const currentSeeds = save?.seeds ?? 0;
+            await supabaseAdmin
+              .from("player_saves")
+              .update({ seeds: currentSeeds + seedsGranted, updated_at: new Date().toISOString() })
+              .eq("user_id", userId);
+          }
         } else if (insertErr.code !== "23505") {
-          // 23505 = unique_violation (already processed this session) — anything else, log it.
           console.error("purchase insert failed", insertErr);
         }
       }
