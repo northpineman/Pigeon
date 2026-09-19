@@ -71,7 +71,7 @@ export default function MeadowMasthead({
         <button type="button" className="meadow-brand-plaque" onClick={() => onTab("home")}>
           <span className="meadow-brand-paw" aria-hidden="true"><MeadowIcon name="paw" /></span>
           <div>
-            <small>SMALL DOGS. BIG ADVENTURES.</small>
+            <small>NARROW DOGS. BROAD ADVENTURES.</small>
             <div className="meadow-wordmark">Iggy Meadow</div>
             <span className="meadow-welcome">Welcome back, @{username}</span>
           </div>
